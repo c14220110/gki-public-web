@@ -825,25 +825,25 @@
           });
       });
 
+      // Variable for the observer, defined in a wider scope
+      let observer;
+
       // === JSONP callback untuk YouTube Spotlight ===
       function renderYT(data) {
-        // Change target to the new container in #jadwal
         const grid = document.getElementById("youtube-spotlight-container");
         if (!grid) return;
 
-        // Prevent duplicate renders
         if (document.querySelector(".youtube-spotlight-card")) {
+          console.log("YouTube card already rendered, skipping.");
           return;
         }
 
-        // tandai JSONP sukses
         window.__ytJsonpOk = true;
 
-        // kalau gagal / tak ada video: jangan render apa-apa
         if (!data || data.error || !data.video) return;
 
         const v = data.video || {};
-        const status = data.status || "latest"; // 'live' | 'upcoming' | 'latest'
+        const status = data.status || "latest";
         const isLive = status === "live";
         const isUpcoming = status === "upcoming";
 
@@ -854,7 +854,6 @@
           ? "bg-amber-600"
           : "bg-slate-600";
 
-        // Coba ambil videoId paling aman (id dari payload, atau dari URL ?v=)
         let videoId = v.id || null;
         if (!videoId && v.url) {
           try {
@@ -866,7 +865,6 @@
           }
         }
 
-        // Paksa thumbnail HTTPS dan pasti ada
         const finalThumb = videoId
           ? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`
           : String(v.thumbnail || "").replace(/^http:/, "https:");
@@ -893,11 +891,9 @@
               : "-");
 
         const card = document.createElement("div");
-        // Add specific class to prevent duplicates and style it
         card.className =
-          "glass-card overflow-hidden p-0 youtube-spotlight-card md:max-w-lg w-full";
+          "glass-card overflow-hidden p-0 youtube-spotlight-card text-left md:max-w-2xl w-full";
         card.setAttribute("data-animate", "");
-        card.style.transitionDelay = "600ms";
 
         card.innerHTML = `
     <div class="relative">
@@ -929,11 +925,11 @@
   `;
 
         grid.appendChild(card);
-        // Animate the new card
-        requestAnimationFrame(() => card.classList.add("is-visible"));
+        if (observer) {
+          observer.observe(card);
+        }
       }
 
-      // kecil: escape teks agar aman dimasukkan ke HTML
       function escapeHtml_(s) {
         return (s || "").replace(
           /[&<>"']/g,
@@ -949,31 +945,27 @@
       }
 
       document.addEventListener("DOMContentLoaded", () => {
-        // Mobile Menu Toggle
         const mobileMenuButton = document.getElementById("mobile-menu-button");
         const mobileMenu = document.getElementById("mobile-menu");
         mobileMenuButton.addEventListener("click", () => {
           mobileMenu.classList.toggle("hidden");
         });
 
-        // Close mobile menu when a link is clicked
         document.querySelectorAll("#mobile-menu a").forEach((link) => {
           link.addEventListener("click", () => {
             mobileMenu.classList.add("hidden");
           });
         });
 
-        // Set current year in footer
         document.getElementById("year").textContent = new Date().getFullYear();
 
-        // Scroll Animation using Intersection Observer
-        const observer = new IntersectionObserver(
+        observer = new IntersectionObserver(
           (entries) => {
             entries.forEach((entry) => {
               if (entry.isIntersecting) {
                 const delay = entry.target.style.transitionDelay
                   ? parseInt(entry.target.style.transitionDelay)
-                  : 200;
+                  : 0;
                 setTimeout(() => {
                   entry.target.classList.add("is-visible");
                 }, delay);
@@ -984,24 +976,20 @@
           { threshold: 0.1 }
         );
 
-        // helper: observe elemen baru juga
         function observeAnimated(container = document) {
           container
             .querySelectorAll("[data-animate]:not(.is-visible)")
             .forEach((el) => observer.observe(el));
         }
 
-        // observe elemen yang sudah ada saat DOM siap
         observeAnimated(document);
 
-        // Header shadow on scroll
         const header = document.getElementById("header");
         window.addEventListener("scroll", () => {
           if (window.scrollY > 10) header.classList.add("shadow-lg");
           else header.classList.remove("shadow-lg");
         });
 
-        // === Warta Jemaat (Drive via Apps Script) ===
         const WARTA_API_URL =
           "https://script.google.com/macros/s/AKfycbx9rM1FxRF-pOCtf1-qARtMvmkaN9n2X4yxVnINFeLfZBTdWQwXmz7yTih6EXWK-6b6ng/exec";
 
@@ -1019,7 +1007,6 @@
 
         function renderWartaCard(item, idx) {
           const delay = idx === 1 ? "200ms" : idx === 2 ? "400ms" : "0ms";
-
           const card = document.createElement("div");
           card.className = "glass-card overflow-hidden p-0";
           card.setAttribute("data-animate", "");
@@ -1030,7 +1017,7 @@
             item.name
           }" class="w-full h-56 object-cover" />
         <div class="p-6">
-          <span class="text-sm font-semibold" style="color: var(--color-text-accent)">PENGUMUMAN</span>
+          <span class="text-sm font-semibold" style="color: var(--color-text-accent)">PENGUMUMUMAN</span>
           <h3 class="text-xl font-bold mt-2" style="color: var(--color-text-main)">${
             item.name || "Warta Jemaat"
           }</h3>
@@ -1040,11 +1027,12 @@
             }
           </p>
           <div class="mt-4 flex items-center gap-3">
-            <a href="${item.downloadUrl}" target="_blank" rel="noopener"
-               class="inline-block font-semibold" style="color: var(--color-text-accent)">Unduh Warta →</a>
-            <a href="${item.viewUrl}" target="_blank" rel="noopener"
-               class="inline-block text-sm underline opacity-80 hover:opacity-100"
-               style="color: var(--color-text-secondary)">Lihat Pratinjau</a>
+            <a href="${
+              item.downloadUrl
+            }" target="_blank" rel="noopener" class="inline-block font-semibold" style="color: var(--color-text-accent)">Unduh Warta →</a>
+            <a href="${
+              item.viewUrl
+            }" target="_blank" rel="noopener" class="inline-block text-sm underline opacity-80 hover:opacity-100" style="color: var(--color-text-secondary)">Lihat Pratinjau</a>
           </div>
         </div>
       `;
@@ -1059,7 +1047,7 @@
                 throw new Error("Invalid JSON from Warta feed");
               }
               const files = data.files;
-              wartaGrid.innerHTML = ""; // Clear only before adding warta cards
+              wartaGrid.innerHTML = "";
 
               if (files.length > 0) {
                 files.forEach((item, idx) => {
@@ -1077,13 +1065,13 @@
             });
         }
 
-        // === YouTube Spotlight (JSONP via Apps Script + Fallback direct API) ===
         const APPS_BASE = WARTA_API_URL.split("?")[0];
         const CHANNEL_ID = "UCLDrtr-jxpA0h9WzmgUiKdQ";
         const YT_API_KEY = "AIzaSyAHfpt1Eqb1yX8iwgTMxUdm-Mxo6nPNhH4";
         window.__ytJsonpOk = false;
 
         async function fetchYouTubeDirect(channelId, apiKey) {
+          if (document.querySelector(".youtube-spotlight-card")) return;
           try {
             console.log(
               "Fallback: Mencoba mengambil data YouTube secara langsung..."
