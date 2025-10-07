@@ -181,6 +181,7 @@
         box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
         transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
       }
+
       .glass-card:hover {
         transform: translateY(-8px) scale(1.02);
         box-shadow: 0 16px 40px 0 rgba(31, 38, 135, 0.15);
@@ -590,13 +591,15 @@
                 >
               </div>
             </div>
-            <!-- Card Warta 3 -->
+
+            <!-- Card Warta 3 (DINAMIS dari Google Drive via Apps Script) -->
             <div
               data-animate
               style="transition-delay: 400ms"
               class="glass-card overflow-hidden p-0"
             >
               <img
+                id="warta-thumb"
                 src="assets/warta.jpg"
                 alt="Warta Jemaat"
                 class="w-full h-56 object-cover"
@@ -608,23 +611,42 @@
                   >PENGUMUMAN</span
                 >
                 <h3
+                  id="warta-title"
                   class="text-xl font-bold mt-2"
                   style="color: var(--color-text-main)"
                 >
                   Warta Jemaat Mingguan
                 </h3>
-                <p class="mt-2" style="color: var(--color-text-secondary)">
-                  Unduh warta jemaat terbaru untuk informasi lengkap seputar
-                  pelayanan gereja.
-                </p>
-                <a
-                  href="#"
-                  class="mt-4 inline-block font-semibold"
-                  style="color: var(--color-text-accent)"
-                  >Unduh Warta →</a
+                <p
+                  id="warta-meta"
+                  class="mt-2"
+                  style="color: var(--color-text-secondary)"
                 >
+                  Memuat info pelayanan terbaru.
+                </p>
+                <div class="mt-4 flex items-center gap-3">
+                  <a
+                    id="warta-link"
+                    href="#"
+                    target="_blank"
+                    rel="noopener"
+                    class="inline-block font-semibold"
+                    style="color: var(--color-text-accent)"
+                    >Unduh Warta →</a
+                  >
+                  <a
+                    id="warta-preview"
+                    href="#"
+                    target="_blank"
+                    rel="noopener"
+                    class="inline-block text-sm underline opacity-80 hover:opacity-100"
+                    style="color: var(--color-text-secondary)"
+                    >Lihat Pratinjau</a
+                  >
+                </div>
               </div>
             </div>
+            <!-- END Card Warta 3 -->
           </div>
         </div>
       </section>
@@ -755,7 +777,7 @@
                       viewBox="0 0 16 16"
                     >
                       <path
-                        d="M13.601 2.326A7.85 7.85 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.9 7.9 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.9 7.9 0 0 0 13.6 2.326zM7.994 14.521a6.6 6.6 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.56 6.56 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592m3.615-4.934c-.197-.1-.816-.404-1.057-.452-.24-.048-.415-.072-.592.072-.177.144-.666.816-.812.98-.144.165-.288.188-.479.072-.19-.117-.803-.297-1.527-.942-.566-.495-.942-1.103-1.057-1.296-.115-.192-.012-.297.06-.396.066-.09.144-.24.216-.36.072-.12.096-.216.144-.36s.024-.288-.024-.384c-.048-.096-.479-1.152-.656-1.576-.177-.424-.366-.366-.504-.372h-.42c-.144 0-.366.048-.543.24-.177.192-.666.654-.666 1.592 0 .938.684 1.85 1.057 2.318.373.468 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.479.152.912.127 1.246.076.384-.058 1.171-.48 1.338-1.037.165-.558.165-1.037.12-1.134-.048-.096-.177-.144-.372-.24z"
+                        d="M13.601 2.326A7.85 7.85 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.9 7.9 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.9 7.9 0 0 0 13.6 2.326zM7.994 14.521a6.6 6.6 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.56 6.56 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592m3.615-4.934c-.197-.1-.816-.404-1.057-.452-.24-.048-.415-.072-.592.072-.177.144-.666.816-.812.98-.144.165-.288.188-.479.072-.19-.117-.803-.297-1.527-.942-.566-.495-.942-1.103-1.057-1.296-.115-.192-.012-.297.06-.396.066-.09.144-.24.216-.36.072-.12.096-.216 .144-.36s.024-.288-.024-.384c-.048-.096-.479-1.152-.656-1.576-.177-.424-.366-.366-.504-.372h-.42c-.144 0-.366.048-.543.24-.177.192-.666.654-.666 1.592 0 .938.684 1.85 1.057 2.318.373.468 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.479.152.912.127 1.246.076.384-.058 1.171-.48 1.338-1.037.165-.558.165-1.037.12-1.134-.048-.096-.177-.144-.372-.24z"
                       />
                     </svg>
                     <span>WhatsApp Kantor</span>
@@ -843,7 +865,7 @@
               >
                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                   <path
-                    d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.85s-.011 3.584-.069 4.85c-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07s-3.584-.012-4.85-.07c-3.252-.148-4.771-1.691-4.919-4.919-.058-1.265-.069-1.645-.069-4.85s.011-3.584.069-4.85c.149-3.225 1.664-4.771 4.919-4.919 1.266-.057 1.644-.069 4.85-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948s.014 3.667.072 4.947c.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072s3.667-.014 4.947-.072c4.358-.2 6.78-2.618 6.98-6.98.059-1.281.073-1.689.073-4.948s-.014-3.667-.072-4.947c-.2-4.358-2.618-6.78-6.98-6.98-1.281-.059-1.689-.073-4.948-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.162 6.162 6.162 6.162-2.759 6.162-6.162-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4s1.791-4 4-4 4 1.79 4 4-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44 1.441-.645 1.441-1.44-.645-1.44-1.441-1.44z"
+                    d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.85s-.011 3.584-.069 4.85c-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07s-3.584-.012-4.85-.07c-3.252-.148-4.771-1.691-4.919-4.919-.058-1.265-.069-1.645-.069-4.85s.011-3.584.069-4.85c.149-3.225 1.664-4.771 4.919-4.919 1.266-.057 1.644-.069 4.85-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948s.014 3.667.072 4.947c.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072s3.667-.014 4.947-.072c4.358-.2 6.78-2.618 6.98-6.98.59-1.281.073-1.689.073-4.948s-.014-3.667-.072-4.947c-.2-4.358-2.618-6.78-6.98-6.98-1.281-.059-1.689-.073-4.948-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.162 6.162 6.162 6.162-2.759 6.162-6.162-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4s1.791-4 4-4 4 1.79 4 4-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44 1.441-.645 1.441-1.44-.645-1.44-1.441-1.44z"
                   />
                 </svg>
               </a>
@@ -965,6 +987,60 @@
           if (window.scrollY > 10) header.classList.add("shadow-lg");
           else header.classList.remove("shadow-lg");
         });
+
+        // === Warta Jemaat (Drive via Apps Script - OPSI B) ===
+        // GANTI URL di bawah dengan Web App URL dari Apps Script kamu (mode Anyone).
+        const WARTA_API_URL =
+          "https://script.google.com/macros/s/AKfycbxi4D3iv21ZD9AVbTaMk2cF5JSlrRH8Ws-toVckp09jn5psAgcAXPPCZdBhkHWQf-LtSQ/exec";
+
+        // Elemen target
+        const wartaThumb = document.getElementById("warta-thumb");
+        const wartaTitle = document.getElementById("warta-title");
+        const wartaMeta = document.getElementById("warta-meta");
+        const wartaLink = document.getElementById("warta-link");
+        const wartaPreview = document.getElementById("warta-preview");
+
+        if (WARTA_API_URL && wartaThumb && wartaLink && wartaPreview) {
+          fetch(WARTA_API_URL)
+            .then((r) => r.json())
+            .then((data) => {
+              if (!data || data.error)
+                throw new Error(data?.error || "No data");
+
+              // Judul dari nama file (opsional)
+              if (data.name) wartaTitle.textContent = data.name;
+
+              // Tanggal update
+              if (data.modifiedTime) {
+                const d = new Date(data.modifiedTime);
+                wartaMeta.textContent = `Terakhir diperbarui: ${d.toLocaleDateString(
+                  "id-ID",
+                  {
+                    weekday: "long",
+                    day: "2-digit",
+                    month: "long",
+                    year: "numeric",
+                  }
+                )}`;
+              }
+
+              // Thumbnail + cache-busting
+              if (data.thumbnailUrl) {
+                wartaThumb.src = `${data.thumbnailUrl}&v=${Date.now()}`;
+              }
+
+              // Tautan unduh & pratinjau
+              if (data.downloadUrl) wartaLink.href = data.downloadUrl;
+              if (data.viewUrl) wartaPreview.href = data.viewUrl;
+            })
+            .catch((err) => {
+              console.error("Warta feed error:", err);
+              // fallback: biarkan gambar & teks default + nonaktifkan link
+              wartaLink.href = "#";
+              wartaPreview.href = "#";
+              wartaPreview.classList.add("pointer-events-none", "opacity-60");
+            });
+        }
       });
     </script>
   </body>
