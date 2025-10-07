@@ -989,7 +989,7 @@
 
         // === Warta Jemaat (Drive via Apps Script - OPSI B, 3 file terbaru) ===
         const WARTA_API_URL =
-          "https://script.google.com/macros/s/AKfycbwZFsTSKa-HBVIKZGhsPSJ-nBvBJSwwyugMimg1qc604XTSwZB7qKS8BGOrju4Kbg1WCA/exec"; // URL Web App kamu
+          "https://script.google.com/macros/s/AKfycbwy2OJ0g_frvoTh4DR2nOeS_hfV8NL4TaS56crWvdUZ27y0g2IiK4BH6YxRALlFh7-oLw/exec"; // URL Web App kamu
 
         const grid = document.getElementById("warta-grid");
 
@@ -1085,7 +1085,10 @@
         // fallback: panggil API YouTube langsung
         async function fetchYouTubeDirect(channelId, apiKey) {
           try {
-            if (!apiKey || apiKey === "PASTE_API_KEY_DI_SINI") {
+            if (
+              !apiKey ||
+              apiKey === "AIzaSyAHfpt1Eqb1yX8iwgTMxUdm-Mxo6nPNhH4"
+            ) {
               console.warn("Tambahkan YT_API_KEY agar fallback bisa jalan.");
               return;
             }
