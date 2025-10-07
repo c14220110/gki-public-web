@@ -10,6 +10,9 @@
     <!-- GSAP (GreenSock Animation Platform) (External) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 
+    <!-- Elfsight platform script (cukup sekali per halaman) -->
+    <script src="https://elfsightcdn.com/platform.js" async></script>
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -178,7 +181,6 @@
         box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
         transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
       }
-
       .glass-card:hover {
         transform: translateY(-8px) scale(1.02);
         box-shadow: 0 16px 40px 0 rgba(31, 38, 135, 0.15);
@@ -235,7 +237,7 @@
       .btn {
         display: inline-block;
         padding: 0.8rem 1.75rem;
-        border-radius: 9999px; /* Pill shape */
+        border-radius: 9999px;
         font-weight: 600;
         text-align: center;
         transition: all 0.3s ease-in-out;
@@ -244,21 +246,21 @@
       }
       .btn-primary {
         background-color: var(--color-text-accent);
-        color: white;
+        color: #fff;
       }
       .btn-primary:hover {
-        background-color: #b45309; /* Stays the same for strong hover effect */
+        background-color: #b45309;
         transform: translateY(-3px);
         box-shadow: 0 7px 20px rgba(217, 119, 6, 0.4);
       }
       .btn-secondary {
         background-color: transparent;
-        color: white;
-        border: 2px solid white;
+        color: #fff;
+        border: 2px solid #fff;
       }
       .btn-secondary:hover {
-        background-color: white;
-        color: #111827; /* Dark text for contrast on white bg */
+        background-color: #fff;
+        color: #111827;
         transform: translateY(-3px);
       }
 
@@ -663,67 +665,48 @@
         </div>
       </section>
 
+      <!-- ===================== GALERI ===================== -->
       <section id="galeri" class="py-24">
         <div class="container mx-auto px-6 text-center">
           <h2 data-animate class="section-title">Galeri Kegiatan</h2>
           <p data-animate class="section-subtitle max-w-3xl mx-auto">
             Momen kebersamaan dan sukacita dalam berbagai kegiatan gereja kami.
           </p>
-          <div class="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4">
+
+          <!-- Elfsight Instagram Feed (3 postingan terbaru) -->
+          <div data-animate class="mt-16">
+            <!-- container widget -->
             <div
-              data-animate
-              class="overflow-hidden rounded-xl h-64 glass-card p-2"
-            >
-              <img
-                src="assets/galeri1.jpg"
-                alt="Galeri 1"
-                class="w-full h-full object-cover rounded-lg transition duration-500 hover:scale-110"
-              />
-            </div>
-            <div
-              data-animate
-              style="transition-delay: 150ms"
-              class="overflow-hidden rounded-xl h-64 glass-card p-2"
-            >
-              <img
-                src="assets/galeri2.jpg"
-                alt="Galeri 2"
-                class="w-full h-full object-cover rounded-lg transition duration-500 hover:scale-110"
-              />
-            </div>
-            <div
-              data-animate
-              style="transition-delay: 300ms"
-              class="overflow-hidden rounded-xl h-64 glass-card p-2"
-            >
-              <img
-                src="assets/galeri3.jpg"
-                alt="Galeri 3"
-                class="w-full h-full object-cover rounded-lg transition duration-500 hover:scale-110"
-              />
-            </div>
-            <div
-              data-animate
-              style="transition-delay: 450ms"
-              class="overflow-hidden rounded-xl h-64 glass-card p-2"
-            >
-              <img
-                src="assets/galeri4.jpg"
-                alt="Galeri 4"
-                class="w-full h-full object-cover rounded-lg transition duration-500 hover:scale-110"
-              />
-            </div>
+              class="elfsight-app-e3036a96-86a2-4869-8b3b-dd700ccf329e"
+              data-elfsight-app-lazy
+            ></div>
+
+            <noscript>
+              <p class="mt-4 text-sm">
+                Aktifkan JavaScript untuk melihat galeri.
+                <a
+                  class="underline"
+                  href="https://www.instagram.com/gkikutisariindah/"
+                  target="_blank"
+                  rel="noopener"
+                  >Buka Instagram</a
+                >
+              </p>
+            </noscript>
           </div>
+
           <div data-animate class="mt-12">
             <a
               href="https://www.instagram.com/gkikutisariindah/"
               target="_blank"
               class="btn btn-primary"
-              >Lihat Lebih Banyak di Instagram</a
             >
+              Lihat Lebih Banyak di Instagram
+            </a>
           </div>
         </div>
       </section>
+      <!-- =================== END GALERI =================== -->
 
       <section id="kontak" class="py-24">
         <div class="container mx-auto px-6">
@@ -900,7 +883,6 @@
 
         const tl = gsap.timeline({
           onComplete: () => {
-            // Sembunyikan preloader dan tampilkan konten utama setelah semua animasi selesai
             gsap.to(preloader, {
               duration: 0.5,
               opacity: 0,
@@ -916,7 +898,6 @@
           },
         });
 
-        // Urutan animasi teks
         tl.to(letters, {
           duration: 0.6,
           y: 0,
@@ -931,9 +912,9 @@
           })
           .to(letters, {
             duration: 0.6,
-            y: -110, // Animasikan ke atas untuk keluar dari layar
+            y: -110,
             stagger: 0.05,
-            delay: 0.8, // Tambahkan jeda sebelum animasi keluar
+            delay: 0.8,
             ease: "power2.in",
           });
       });
@@ -973,23 +954,16 @@
               }
             });
           },
-          {
-            threshold: 0.1,
-          }
+          { threshold: 0.1 }
         );
 
-        animatedElements.forEach((el) => {
-          observer.observe(el);
-        });
+        animatedElements.forEach((el) => observer.observe(el));
 
         // Header shadow on scroll
         const header = document.getElementById("header");
         window.addEventListener("scroll", () => {
-          if (window.scrollY > 10) {
-            header.classList.add("shadow-lg");
-          } else {
-            header.classList.remove("shadow-lg");
-          }
+          if (window.scrollY > 10) header.classList.add("shadow-lg");
+          else header.classList.remove("shadow-lg");
         });
       });
     </script>
