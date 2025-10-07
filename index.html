@@ -523,13 +523,9 @@
             datang di gereja kami.
           </p>
           <div
+            id="warta-grid"
             class="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 text-left"
-          >
-            <div
-              id="warta-grid"
-              class="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 text-left"
-            ></div>
-          </div>
+          ></div>
         </div>
       </section>
 
@@ -842,8 +838,6 @@
         document.getElementById("year").textContent = new Date().getFullYear();
 
         // Scroll Animation using Intersection Observer
-        const animatedElements = document.querySelectorAll("[data-animate]");
-
         const observer = new IntersectionObserver(
           (entries) => {
             entries.forEach((entry) => {
@@ -860,6 +854,16 @@
           },
           { threshold: 0.1 }
         );
+
+        // fungsi helper: observe elemen baru juga
+        function observeAnimated(container = document) {
+          container
+            .querySelectorAll("[data-animate]:not(.is-visible)")
+            .forEach((el) => observer.observe(el));
+        }
+
+        // observe elemen yang sudah ada saat DOM siap
+        observeAnimated(document);
 
         animatedElements.forEach((el) => observer.observe(el));
 
@@ -937,10 +941,13 @@
                 return;
               }
 
-              files.forEach((item, idx) => {
+              ffiles.forEach((item, idx) => {
                 const card = renderCard(item, idx);
                 grid.appendChild(card);
               });
+
+              // >>> tambahkan baris ini <<<
+              observeAnimated(grid);
             })
             .catch((err) => {
               console.error("Warta feed error:", err);
