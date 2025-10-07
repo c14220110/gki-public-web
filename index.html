@@ -865,8 +865,6 @@
         // observe elemen yang sudah ada saat DOM siap
         observeAnimated(document);
 
-        animatedElements.forEach((el) => observer.observe(el));
-
         // Header shadow on scroll
         const header = document.getElementById("header");
         window.addEventListener("scroll", () => {
@@ -941,7 +939,7 @@
                 return;
               }
 
-              ffiles.forEach((item, idx) => {
+              files.forEach((item, idx) => {
                 const card = renderCard(item, idx);
                 grid.appendChild(card);
               });
