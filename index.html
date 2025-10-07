@@ -989,7 +989,7 @@
 
         // === Warta Jemaat (Drive via Apps Script - OPSI B, 3 file terbaru) ===
         const WARTA_API_URL =
-          "https://script.google.com/macros/s/AKfycbwjfuQuhzixj6_9ep-ruMU3v0GQ7P9fylZif20LaodPX1v8vCJ7dfUWWpoNoF4sPklR4A/exec"; // URL Web App kamu
+          "https://script.google.com/macros/s/AKfycbx9rM1FxRF-pOCtf1-qARtMvmkaN9n2X4yxVnINFeLfZBTdWQwXmz7yTih6EXWK-6b6ng/exec"; // URL Web App kamu
 
         const grid = document.getElementById("warta-grid");
 
@@ -1085,6 +1085,9 @@
         // fallback: panggil API YouTube langsung
         async function fetchYouTubeDirect(channelId, apiKey) {
           try {
+            console.log(
+              "Fallback: Mencoba mengambil data YouTube secara langsung..."
+            ); // LOG 1
             if (!apiKey || apiKey === "GANTI_DENGAN_API_KEY_YOUTUBE_ANDA") {
               console.warn("Tambahkan YT_API_KEY agar fallback bisa jalan.");
               return;
@@ -1092,8 +1095,10 @@
 
             // 1) Cek live dulu
             const liveURL = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&eventType=live&type=video&order=date&maxResults=1&key=${apiKey}`;
+            console.log("Fallback: Cek live di URL:", liveURL); // LOG 2
             let res = await fetch(liveURL);
             let js = await res.json();
+            console.log("Fallback: Respons dari cek live:", js); // LOG 3
 
             let status = "latest";
             let vidId = null;
@@ -1115,10 +1120,15 @@
                 }
               }
             } else {
+              console.log(
+                "Fallback: Tidak ada siaran live, cek video terbaru..."
+              ); // LOG 4
               // 2) Tidak live → ambil video terbaru
               const latestURL = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&type=video&order=date&maxResults=1&key=${apiKey}`;
+              console.log("Fallback: Cek video terbaru di URL:", latestURL); // LOG 5
               res = await fetch(latestURL);
               js = await res.json();
+              console.log("Fallback: Respons dari cek video terbaru:", js); // LOG 6
               if (Array.isArray(js.items) && js.items.length) {
                 status = "latest";
                 vidId = js.items[0].id && js.items[0].id.videoId;
@@ -1144,6 +1154,18 @@
               "";
 
             // samakan shape dengan Apps Script agar bisa dipakai renderYT
+            console.log("Fallback: Menyiapkan data untuk dirender...", {
+              // LOG 7
+              status,
+              video: {
+                id: vidId,
+                title: snippet.title,
+                url: `https://www.youtube.com/watch?v=${vidId}`,
+                publishedAt: snippet.publishedAt,
+                liveDetails: liveStreamingDetails,
+                thumbnail: thumb,
+              },
+            });
             renderYT({
               status,
               video: {
