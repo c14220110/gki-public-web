@@ -525,128 +525,10 @@
           <div
             class="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 text-left"
           >
-            <!-- Card Warta 1 -->
-            <div data-animate class="glass-card overflow-hidden p-0">
-              <img
-                src="assets/paskah.jpg"
-                alt="Acara Paskah"
-                class="w-full h-56 object-cover"
-              />
-              <div class="p-6">
-                <span
-                  class="text-sm font-semibold"
-                  style="color: var(--color-text-accent)"
-                  >ACARA SPESIAL</span
-                >
-                <h3
-                  class="text-xl font-bold mt-2"
-                  style="color: var(--color-text-main)"
-                >
-                  Perayaan Paskah 2025
-                </h3>
-                <p class="mt-2" style="color: var(--color-text-secondary)">
-                  Rayakan kemenangan Kristus dalam Ibadah Paskah yang akan
-                  diadakan secara khusus.
-                </p>
-                <a
-                  href="#"
-                  class="mt-4 inline-block font-semibold"
-                  style="color: var(--color-text-accent)"
-                  >Info Selengkapnya →</a
-                >
-              </div>
-            </div>
-            <!-- Card Warta 2 -->
             <div
-              data-animate
-              style="transition-delay: 200ms"
-              class="glass-card overflow-hidden p-0"
-            >
-              <img
-                src="assets/seminar.jpg"
-                alt="Seminar Keluarga"
-                class="w-full h-56 object-cover"
-              />
-              <div class="p-6">
-                <span
-                  class="text-sm font-semibold"
-                  style="color: var(--color-text-accent)"
-                  >SEMINAR</span
-                >
-                <h3
-                  class="text-xl font-bold mt-2"
-                  style="color: var(--color-text-main)"
-                >
-                  Seminar Keluarga Harmonis
-                </h3>
-                <p class="mt-2" style="color: var(--color-text-secondary)">
-                  Membangun keluarga yang kokoh di dalam Tuhan. Terbuka untuk
-                  semua jemaat.
-                </p>
-                <a
-                  href="#"
-                  class="mt-4 inline-block font-semibold"
-                  style="color: var(--color-text-accent)"
-                  >Info Selengkapnya →</a
-                >
-              </div>
-            </div>
-
-            <!-- Card Warta 3 (DINAMIS dari Google Drive via Apps Script) -->
-            <div
-              data-animate
-              style="transition-delay: 400ms"
-              class="glass-card overflow-hidden p-0"
-            >
-              <img
-                id="warta-thumb"
-                src="assets/warta.jpg"
-                alt="Warta Jemaat"
-                class="w-full h-56 object-cover"
-              />
-              <div class="p-6">
-                <span
-                  class="text-sm font-semibold"
-                  style="color: var(--color-text-accent)"
-                  >PENGUMUMAN</span
-                >
-                <h3
-                  id="warta-title"
-                  class="text-xl font-bold mt-2"
-                  style="color: var(--color-text-main)"
-                >
-                  Warta Jemaat Mingguan
-                </h3>
-                <p
-                  id="warta-meta"
-                  class="mt-2"
-                  style="color: var(--color-text-secondary)"
-                >
-                  Memuat info pelayanan terbaru.
-                </p>
-                <div class="mt-4 flex items-center gap-3">
-                  <a
-                    id="warta-link"
-                    href="#"
-                    target="_blank"
-                    rel="noopener"
-                    class="inline-block font-semibold"
-                    style="color: var(--color-text-accent)"
-                    >Unduh Warta →</a
-                  >
-                  <a
-                    id="warta-preview"
-                    href="#"
-                    target="_blank"
-                    rel="noopener"
-                    class="inline-block text-sm underline opacity-80 hover:opacity-100"
-                    style="color: var(--color-text-secondary)"
-                    >Lihat Pratinjau</a
-                  >
-                </div>
-              </div>
-            </div>
-            <!-- END Card Warta 3 -->
+              id="warta-grid"
+              class="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 text-left"
+            ></div>
           </div>
         </div>
       </section>
@@ -988,60 +870,86 @@
           else header.classList.remove("shadow-lg");
         });
 
-        // === Warta Jemaat (Drive via Apps Script - OPSI B) ===
-        // GANTI URL di bawah dengan Web App URL dari Apps Script kamu (mode Anyone).
-        const WARTA_API_URL =
-          "https://script.google.com/macros/s/AKfycbxi4D3iv21ZD9AVbTaMk2cF5JSlrRH8Ws-toVckp09jn5psAgcAXPPCZdBhkHWQf-LtSQ/exec";
+        // === Warta Jemaat (Drive via Apps Script - OPSI B, 3 file terbaru) ===
+        const WARTA_API_URL = "PASTE_WEB_APP_URL_HERE"; // ganti dengan URL Web App kamu
 
-        // Elemen target
-        const wartaThumb = document.getElementById("warta-thumb");
-        const wartaTitle = document.getElementById("warta-title");
-        const wartaMeta = document.getElementById("warta-meta");
-        const wartaLink = document.getElementById("warta-link");
-        const wartaPreview = document.getElementById("warta-preview");
+        const grid = document.getElementById("warta-grid");
 
-        if (WARTA_API_URL && wartaThumb && wartaLink && wartaPreview) {
+        function formatTanggalID(dateStr) {
+          const d = new Date(dateStr);
+          return d.toLocaleDateString("id-ID", {
+            weekday: "long",
+            day: "2-digit",
+            month: "long",
+            year: "numeric",
+          });
+        }
+
+        function renderCard(item, idx) {
+          const delay = idx === 1 ? "200ms" : idx === 2 ? "400ms" : "0ms";
+
+          const card = document.createElement("div");
+          card.className = "glass-card overflow-hidden p-0";
+          card.setAttribute("data-animate", "");
+          card.style.transitionDelay = delay;
+
+          card.innerHTML = `
+          <img src="${item.thumbnailUrl}&v=${Date.now()}" alt="${
+            item.name
+          }" class="w-full h-56 object-cover" />
+          <div class="p-6">
+            <span class="text-sm font-semibold" style="color: var(--color-text-accent)">PENGUMUMAN</span>
+            <h3 class="text-xl font-bold mt-2" style="color: var(--color-text-main)">${
+              item.name || "Warta Jemaat"
+            }</h3>
+            <p class="mt-2" style="color: var(--color-text-secondary)">
+              Terakhir diperbarui: ${
+                item.modifiedTime ? formatTanggalID(item.modifiedTime) : "-"
+              }
+            </p>
+            <div class="mt-4 flex items-center gap-3">
+              <a href="${item.downloadUrl}" target="_blank" rel="noopener"
+                 class="inline-block font-semibold" style="color: var(--color-text-accent)">Unduh Warta →</a>
+              <a href="${item.viewUrl}" target="_blank" rel="noopener"
+                 class="inline-block text-sm underline opacity-80 hover:opacity-100"
+                 style="color: var(--color-text-secondary)">Lihat Pratinjau</a>
+            </div>
+          </div>
+        `;
+          return card;
+        }
+
+        if (WARTA_API_URL && grid) {
           fetch(WARTA_API_URL)
             .then((r) => r.json())
             .then((data) => {
-              if (!data || data.error)
-                throw new Error(data?.error || "No data");
+              if (!data || !Array.isArray(data.files))
+                throw new Error("Invalid JSON");
+              const files = data.files;
+              grid.innerHTML = "";
 
-              // Judul dari nama file (opsional)
-              if (data.name) wartaTitle.textContent = data.name;
-
-              // Tanggal update
-              if (data.modifiedTime) {
-                const d = new Date(data.modifiedTime);
-                wartaMeta.textContent = `Terakhir diperbarui: ${d.toLocaleDateString(
-                  "id-ID",
-                  {
-                    weekday: "long",
-                    day: "2-digit",
-                    month: "long",
-                    year: "numeric",
-                  }
-                )}`;
+              if (files.length === 0) {
+                grid.innerHTML = `
+                <div class="text-center col-span-3">
+                  <p style="color: var(--color-text-secondary)">Belum ada Warta terbaru.</p>
+                </div>`;
+                return;
               }
 
-              // Thumbnail + cache-busting
-              if (data.thumbnailUrl) {
-                wartaThumb.src = `${data.thumbnailUrl}&v=${Date.now()}`;
-              }
-
-              // Tautan unduh & pratinjau
-              if (data.downloadUrl) wartaLink.href = data.downloadUrl;
-              if (data.viewUrl) wartaPreview.href = data.viewUrl;
+              files.forEach((item, idx) => {
+                const card = renderCard(item, idx);
+                grid.appendChild(card);
+              });
             })
             .catch((err) => {
               console.error("Warta feed error:", err);
-              // fallback: biarkan gambar & teks default + nonaktifkan link
-              wartaLink.href = "#";
-              wartaPreview.href = "#";
-              wartaPreview.classList.add("pointer-events-none", "opacity-60");
+              grid.innerHTML = `
+              <div class="text-center col-span-3">
+                <p style="color: var(--color-text-secondary)">Gagal memuat Warta.</p>
+              </div>`;
             });
-        }
-      });
+        } // end if (WARTA_API_URL && grid)
+      }); // <-- tambahkan baris ini
     </script>
   </body>
 </html>
