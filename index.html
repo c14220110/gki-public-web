@@ -871,7 +871,8 @@
         });
 
         // === Warta Jemaat (Drive via Apps Script - OPSI B, 3 file terbaru) ===
-        const WARTA_API_URL = "PASTE_WEB_APP_URL_HERE"; // ganti dengan URL Web App kamu
+        const WARTA_API_URL =
+          "https://script.google.com/macros/s/AKfycbwvowKFPPHl4hHN5IzuQF8Wyr3w-P7wUKTzw2Oj_69zWoPZmBcfPxCkR2dYc8je5Rqo_A/exec"; // ganti dengan URL Web App kamu
 
         const grid = document.getElementById("warta-grid");
 
@@ -948,8 +949,8 @@
                 <p style="color: var(--color-text-secondary)">Gagal memuat Warta.</p>
               </div>`;
             });
-        } // end if (WARTA_API_URL && grid)
-      }); // <-- tambahkan baris ini
+        }
+      });
     </script>
   </body>
 </html>
