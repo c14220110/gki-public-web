@@ -522,6 +522,14 @@
             Tetap terhubung dengan berita terbaru dan acara spesial yang akan
             datang di gereja kami.
           </p>
+          <!-- === YouTube Live Spotlight === -->
+          <div
+            id="yt-live"
+            class="mt-10"
+            data-animate
+            style="transition-delay: 0ms"
+          ></div>
+
           <div
             id="warta-grid"
             class="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 text-left"
@@ -819,6 +827,96 @@
           });
       });
 
+      // === JSONP callback untuk YouTube Spotlight (harus global) ===
+      function renderYT(data) {
+        const wrap = document.getElementById("yt-live");
+        if (!wrap) return;
+
+        // jika error / tidak ada video, kosongkan saja
+        if (!data || data.error || !data.video) {
+          wrap.innerHTML = "";
+          return;
+        }
+
+        const v = data.video || {};
+        const status = data.status || "latest"; // 'live' | 'upcoming' | 'latest'
+        const isLive = status === "live";
+        const isUpcoming = status === "upcoming";
+
+        const badge = isLive ? "LIVE" : isUpcoming ? "SEGERA" : "TERBARU";
+        const badgeClass = isLive
+          ? "bg-red-600"
+          : isUpcoming
+          ? "bg-amber-600"
+          : "bg-slate-600";
+
+        const whenText = isLive
+          ? "Sedang live sekarang."
+          : isUpcoming && v.liveDetails && v.liveDetails.scheduledStartTime
+          ? "Tayang: " +
+            new Date(v.liveDetails.scheduledStartTime).toLocaleString("id-ID", {
+              weekday: "long",
+              day: "2-digit",
+              month: "long",
+              year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            })
+          : "Diunggah: " +
+            (v.publishedAt
+              ? new Date(v.publishedAt).toLocaleDateString("id-ID", {
+                  day: "2-digit",
+                  month: "long",
+                  year: "numeric",
+                })
+              : "-");
+
+        wrap.innerHTML = `
+      <div class="glass-card p-0 overflow-hidden">
+        <div class="flex flex-col md:flex-row">
+          <div class="relative md:w-1/2">
+            <img src="${v.thumbnail}&v=${Date.now()}" alt="${escapeHtml_(
+          v.title
+        )}"
+                 class="w-full h-64 md:h-full object-cover" />
+            <span class="absolute top-3 left-3 text-xs font-bold text-white px-2 py-1 rounded ${badgeClass}">
+              ${badge}
+            </span>
+          </div>
+          <div class="md:w-1/2 p-6 flex flex-col justify-center">
+            <span class="text-sm font-semibold" style="color: var(--color-text-accent)">SIARAN DARI YOUTUBE</span>
+            <h3 class="text-2xl font-bold mt-2" style="color: var(--color-text-main)">${escapeHtml_(
+              v.title
+            )}</h3>
+            <p class="mt-2 text-sm" style="color: var(--color-text-secondary)">${whenText}</p>
+            <div class="mt-4 flex items-center gap-3">
+              <a href="${
+                v.url
+              }" target="_blank" rel="noopener" class="btn btn-primary">Tonton di YouTube</a>
+              <a href="https://www.youtube.com/@gkikutisariindah2685" target="_blank" rel="noopener"
+                 class="font-semibold" style="color: var(--color-text-accent)">Kunjungi Channel →</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+      }
+
+      // kecil: escape teks agar aman dimasukkan ke HTML
+      function escapeHtml_(s) {
+        return (s || "").replace(
+          /[&<>"']/g,
+          (m) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#39;",
+            }[m])
+        );
+      }
+
       document.addEventListener("DOMContentLoaded", () => {
         // Mobile Menu Toggle
         const mobileMenuButton = document.getElementById("mobile-menu-button");
@@ -855,7 +953,7 @@
           { threshold: 0.1 }
         );
 
-        // fungsi helper: observe elemen baru juga
+        // helper: observe elemen baru juga
         function observeAnimated(container = document) {
           container
             .querySelectorAll("[data-animate]:not(.is-visible)")
@@ -874,7 +972,7 @@
 
         // === Warta Jemaat (Drive via Apps Script - OPSI B, 3 file terbaru) ===
         const WARTA_API_URL =
-          "https://script.google.com/macros/s/AKfycbzr5t7zWfe8dCP1_BR34lQMn_WsmFPjDKOs5ifHnLk4F1F6fK5J2TMB3idBIWQnlMKfVA/exec"; // ganti dengan URL Web App kamu
+          "https://script.google.com/macros/s/AKfycbyuWQac72TXHDhOZryVytbPuTknPauiAPa8f7o15AcPByFcbE8snlgxHiAt91ps5t3n2g/exec"; // URL Web App kamu
 
         const grid = document.getElementById("warta-grid");
 
@@ -897,28 +995,28 @@
           card.style.transitionDelay = delay;
 
           card.innerHTML = `
-          <img src="${item.thumbnailUrl}&v=${Date.now()}" alt="${
+        <img src="${item.thumbnailUrl}&v=${Date.now()}" alt="${
             item.name
           }" class="w-full h-56 object-cover" />
-          <div class="p-6">
-            <span class="text-sm font-semibold" style="color: var(--color-text-accent)">PENGUMUMAN</span>
-            <h3 class="text-xl font-bold mt-2" style="color: var(--color-text-main)">${
-              item.name || "Warta Jemaat"
-            }</h3>
-            <p class="mt-2" style="color: var(--color-text-secondary)">
-              Terakhir diperbarui: ${
-                item.modifiedTime ? formatTanggalID(item.modifiedTime) : "-"
-              }
-            </p>
-            <div class="mt-4 flex items-center gap-3">
-              <a href="${item.downloadUrl}" target="_blank" rel="noopener"
-                 class="inline-block font-semibold" style="color: var(--color-text-accent)">Unduh Warta →</a>
-              <a href="${item.viewUrl}" target="_blank" rel="noopener"
-                 class="inline-block text-sm underline opacity-80 hover:opacity-100"
-                 style="color: var(--color-text-secondary)">Lihat Pratinjau</a>
-            </div>
+        <div class="p-6">
+          <span class="text-sm font-semibold" style="color: var(--color-text-accent)">PENGUMUMAN</span>
+          <h3 class="text-xl font-bold mt-2" style="color: var(--color-text-main)">${
+            item.name || "Warta Jemaat"
+          }</h3>
+          <p class="mt-2" style="color: var(--color-text-secondary)">
+            Terakhir diperbarui: ${
+              item.modifiedTime ? formatTanggalID(item.modifiedTime) : "-"
+            }
+          </p>
+          <div class="mt-4 flex items-center gap-3">
+            <a href="${item.downloadUrl}" target="_blank" rel="noopener"
+               class="inline-block font-semibold" style="color: var(--color-text-accent)">Unduh Warta →</a>
+            <a href="${item.viewUrl}" target="_blank" rel="noopener"
+               class="inline-block text-sm underline opacity-80 hover:opacity-100"
+               style="color: var(--color-text-secondary)">Lihat Pratinjau</a>
           </div>
-        `;
+        </div>
+      `;
           return card;
         }
 
@@ -933,9 +1031,9 @@
 
               if (files.length === 0) {
                 grid.innerHTML = `
-                <div class="text-center col-span-3">
-                  <p style="color: var(--color-text-secondary)">Belum ada Warta terbaru.</p>
-                </div>`;
+              <div class="text-center col-span-3">
+                <p style="color: var(--color-text-secondary)">Belum ada Warta terbaru.</p>
+              </div>`;
                 return;
               }
 
@@ -944,17 +1042,31 @@
                 grid.appendChild(card);
               });
 
-              // >>> tambahkan baris ini <<<
               observeAnimated(grid);
             })
             .catch((err) => {
               console.error("Warta feed error:", err);
               grid.innerHTML = `
-              <div class="text-center col-span-3">
-                <p style="color: var(--color-text-secondary)">Gagal memuat Warta.</p>
-              </div>`;
+            <div class="text-center col-span-3">
+              <p style="color: var(--color-text-secondary)">Gagal memuat Warta.</p>
+            </div>`;
             });
         }
+
+        // === YouTube Spotlight (JSONP via Apps Script yang sama) ===
+        // Ambil base dari WARTA_API_URL agar tidak perlu copas URL lain
+        const APPS_BASE = WARTA_API_URL.split("?")[0]; // pastikan ujungnya /exec
+        const CHANNEL_ID = "UCLDrtr-jxpA0h9WzmgUiKdQ"; // dari kamu
+        const YT_JSONP_URL =
+          APPS_BASE +
+          "?service=yt&channelId=" +
+          encodeURIComponent(CHANNEL_ID) +
+          "&callback=renderYT";
+
+        // Inject <script> JSONP
+        const s = document.createElement("script");
+        s.src = YT_JSONP_URL;
+        document.body.appendChild(s);
       });
     </script>
   </body>
