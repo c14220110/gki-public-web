@@ -512,6 +512,11 @@
               </p>
             </div>
           </div>
+          <!-- Container for YouTube Spotlight -->
+          <div
+            id="youtube-spotlight-container"
+            class="mt-16 grid justify-center"
+          ></div>
         </div>
       </section>
 
@@ -820,10 +825,16 @@
           });
       });
 
-      // === JSONP callback untuk YouTube Spotlight (masuk ke #warta-grid) ===
+      // === JSONP callback untuk YouTube Spotlight ===
       function renderYT(data) {
-        const grid = document.getElementById("warta-grid");
+        // Change target to the new container in #jadwal
+        const grid = document.getElementById("youtube-spotlight-container");
         if (!grid) return;
+
+        // Prevent duplicate renders
+        if (document.querySelector(".youtube-spotlight-card")) {
+          return;
+        }
 
         // tandai JSONP sukses
         window.__ytJsonpOk = true;
@@ -882,9 +893,11 @@
               : "-");
 
         const card = document.createElement("div");
-        card.className = "glass-card overflow-hidden p-0";
+        // Add specific class to prevent duplicates and style it
+        card.className =
+          "glass-card overflow-hidden p-0 youtube-spotlight-card md:max-w-lg w-full";
         card.setAttribute("data-animate", "");
-        card.style.transitionDelay = "600ms"; // muncul setelah 3 kartu warta
+        card.style.transitionDelay = "600ms";
 
         card.innerHTML = `
     <div class="relative">
@@ -909,13 +922,14 @@
           (videoId ? `https://www.youtube.com/watch?v=${videoId}` : "#")
         }"
            target="_blank" rel="noopener" class="inline-block btn btn-primary">Tonton di YouTube</a>
-        <a href="https://www.youtube.com/@gkikutisariindah" target="_blank" rel="noopener"
+        <a href="https://www.youtube.com/@gkikutisariindah2685" target="_blank" rel="noopener"
            class="inline-block font-semibold" style="color: var(--color-text-accent)">Kunjungi Channel →</a>
       </div>
     </div>
   `;
 
         grid.appendChild(card);
+        // Animate the new card
         requestAnimationFrame(() => card.classList.add("is-visible"));
       }
 
@@ -987,11 +1001,11 @@
           else header.classList.remove("shadow-lg");
         });
 
-        // === Warta Jemaat (Drive via Apps Script - OPSI B, 3 file terbaru) ===
+        // === Warta Jemaat (Drive via Apps Script) ===
         const WARTA_API_URL =
           "https://script.google.com/macros/s/AKfycbx9rM1FxRF-pOCtf1-qARtMvmkaN9n2X4yxVnINFeLfZBTdWQwXmz7yTih6EXWK-6b6ng/exec";
 
-        const grid = document.getElementById("warta-grid");
+        const wartaGrid = document.getElementById("warta-grid");
 
         function formatTanggalID(dateStr) {
           const d = new Date(dateStr);
@@ -1003,7 +1017,7 @@
           });
         }
 
-        function renderCard(item, idx) {
+        function renderWartaCard(item, idx) {
           const delay = idx === 1 ? "200ms" : idx === 2 ? "400ms" : "0ms";
 
           const card = document.createElement("div");
@@ -1037,7 +1051,7 @@
           return card;
         }
 
-        if (WARTA_API_URL && grid) {
+        if (WARTA_API_URL && wartaGrid) {
           fetch(WARTA_API_URL)
             .then((r) => r.json())
             .then((data) => {
@@ -1045,33 +1059,21 @@
                 throw new Error("Invalid JSON from Warta feed");
               }
               const files = data.files;
-              const fragment = document.createDocumentFragment();
+              wartaGrid.innerHTML = ""; // Clear only before adding warta cards
 
               if (files.length > 0) {
                 files.forEach((item, idx) => {
-                  const card = renderCard(item, idx);
-                  fragment.appendChild(card);
+                  const card = renderWartaCard(item, idx);
+                  wartaGrid.appendChild(card);
                 });
               } else {
-                if (grid.children.length === 0) {
-                  const placeholder = document.createElement("div");
-                  placeholder.className = "text-center col-span-3";
-                  placeholder.innerHTML = `<p style="color: var(--color-text-secondary)">Belum ada Warta terbaru.</p>`;
-                  fragment.appendChild(placeholder);
-                }
+                wartaGrid.innerHTML = `<div class="text-center col-span-3"><p style="color: var(--color-text-secondary)">Belum ada Warta terbaru.</p></div>`;
               }
-
-              grid.prepend(fragment);
-              observeAnimated(grid);
+              observeAnimated(wartaGrid);
             })
             .catch((err) => {
               console.error("Warta feed error:", err);
-              if (grid.children.length === 0) {
-                grid.innerHTML = `
-                        <div class="text-center col-span-3">
-                            <p style="color: var(--color-text-secondary)">Gagal memuat Warta Jemaat.</p>
-                        </div>`;
-              }
+              wartaGrid.innerHTML = `<div class="text-center col-span-3"><p style="color: var(--color-text-secondary)">Gagal memuat Warta Jemaat.</p></div>`;
             });
         }
 
@@ -1092,10 +1094,8 @@
             }
 
             const liveURL = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&eventType=live&type=video&order=date&maxResults=1&key=${apiKey}`;
-            console.log("Fallback: Cek live di URL:", liveURL);
             let res = await fetch(liveURL);
             let js = await res.json();
-            console.log("Fallback: Respons dari cek live:", js);
 
             let status = "latest";
             let vidId = null;
@@ -1116,14 +1116,9 @@
                 }
               }
             } else {
-              console.log(
-                "Fallback: Tidak ada siaran live, cek video terbaru..."
-              );
               const latestURL = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&type=video&order=date&maxResults=1&key=${apiKey}`;
-              console.log("Fallback: Cek video terbaru di URL:", latestURL);
               res = await fetch(latestURL);
               js = await res.json();
-              console.log("Fallback: Respons dari cek video terbaru:", js);
               if (Array.isArray(js.items) && js.items.length) {
                 status = "latest";
                 vidId = js.items[0].id && js.items[0].id.videoId;
@@ -1148,17 +1143,6 @@
                 snippet.thumbnails.default.url) ||
               "";
 
-            console.log("Fallback: Menyiapkan data untuk dirender...", {
-              status,
-              video: {
-                id: vidId,
-                title: snippet.title,
-                url: `https://www.youtube.com/watch?v=${vidId}`,
-                publishedAt: snippet.publishedAt,
-                liveDetails: liveStreamingDetails,
-                thumbnail: thumb,
-              },
-            });
             renderYT({
               status,
               video: {
