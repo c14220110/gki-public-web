@@ -989,7 +989,7 @@
 
         // === Warta Jemaat (Drive via Apps Script - OPSI B, 3 file terbaru) ===
         const WARTA_API_URL =
-          "https://script.google.com/macros/s/AKfycbx9rM1FxRF-pOCtf1-qARtMvmkaN9n2X4yxVnINFeLfZBTdWQwXmz7yTih6EXWK-6b6ng/exec"; // URL Web App kamu
+          "https://script.google.com/macros/s/AKfycbx9rM1FxRF-pOCtf1-qARtMvmkaN9n2X4yxVnINFeLfZBTdWQwXmz7yTih6EXWK-6b6ng/exec";
 
         const grid = document.getElementById("warta-grid");
 
@@ -1041,64 +1041,61 @@
           fetch(WARTA_API_URL)
             .then((r) => r.json())
             .then((data) => {
-              if (!data || !Array.isArray(data.files))
-                throw new Error("Invalid JSON");
+              if (!data || !Array.isArray(data.files)) {
+                throw new Error("Invalid JSON from Warta feed");
+              }
               const files = data.files;
-              grid.innerHTML = "";
+              const fragment = document.createDocumentFragment();
 
-              if (files.length === 0) {
-                grid.innerHTML = `
-              <div class="text-center col-span-3">
-                <p style="color: var(--color-text-secondary)">Belum ada Warta terbaru.</p>
-              </div>`;
-                return;
+              if (files.length > 0) {
+                files.forEach((item, idx) => {
+                  const card = renderCard(item, idx);
+                  fragment.appendChild(card);
+                });
+              } else {
+                if (grid.children.length === 0) {
+                  const placeholder = document.createElement("div");
+                  placeholder.className = "text-center col-span-3";
+                  placeholder.innerHTML = `<p style="color: var(--color-text-secondary)">Belum ada Warta terbaru.</p>`;
+                  fragment.appendChild(placeholder);
+                }
               }
 
-              files.forEach((item, idx) => {
-                const card = renderCard(item, idx);
-                grid.appendChild(card);
-              });
-
+              grid.prepend(fragment);
               observeAnimated(grid);
             })
             .catch((err) => {
               console.error("Warta feed error:", err);
-              grid.innerHTML = `
-            <div class="text-center col-span-3">
-              <p style="color: var(--color-text-secondary)">Gagal memuat Warta.</p>
-            </div>`;
+              if (grid.children.length === 0) {
+                grid.innerHTML = `
+                        <div class="text-center col-span-3">
+                            <p style="color: var(--color-text-secondary)">Gagal memuat Warta Jemaat.</p>
+                        </div>`;
+              }
             });
         }
 
         // === YouTube Spotlight (JSONP via Apps Script + Fallback direct API) ===
-        const APPS_BASE = WARTA_API_URL.split("?")[0]; // pastikan ujungnya /exec
+        const APPS_BASE = WARTA_API_URL.split("?")[0];
         const CHANNEL_ID = "UCLDrtr-jxpA0h9WzmgUiKdQ";
-
-        // >>>> MASUKKAN API KEY-MU DI SINI <<<<
-        // Cara ambil: Google Cloud Console → APIs & Services → Credentials → Create API key.
-        // Aktifkan "YouTube Data API v3" di Library.
         const YT_API_KEY = "AIzaSyAHfpt1Eqb1yX8iwgTMxUdm-Mxo6nPNhH4";
-
-        // penanda apakah JSONP berhasil memanggil renderYT
         window.__ytJsonpOk = false;
 
-        // fallback: panggil API YouTube langsung
         async function fetchYouTubeDirect(channelId, apiKey) {
           try {
             console.log(
               "Fallback: Mencoba mengambil data YouTube secara langsung..."
-            ); // LOG 1
+            );
             if (!apiKey || apiKey === "GANTI_DENGAN_API_KEY_YOUTUBE_ANDA") {
               console.warn("Tambahkan YT_API_KEY agar fallback bisa jalan.");
               return;
             }
 
-            // 1) Cek live dulu
             const liveURL = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&eventType=live&type=video&order=date&maxResults=1&key=${apiKey}`;
-            console.log("Fallback: Cek live di URL:", liveURL); // LOG 2
+            console.log("Fallback: Cek live di URL:", liveURL);
             let res = await fetch(liveURL);
             let js = await res.json();
-            console.log("Fallback: Respons dari cek live:", js); // LOG 3
+            console.log("Fallback: Respons dari cek live:", js);
 
             let status = "latest";
             let vidId = null;
@@ -1108,7 +1105,6 @@
             if (Array.isArray(js.items) && js.items.length) {
               status = "live";
               vidId = js.items[0].id && js.items[0].id.videoId;
-              // ambil detail live (jadwal)
               if (vidId) {
                 const detailURL = `https://www.googleapis.com/youtube/v3/videos?part=snippet,liveStreamingDetails&id=${vidId}&key=${apiKey}`;
                 const r2 = await fetch(detailURL);
@@ -1122,13 +1118,12 @@
             } else {
               console.log(
                 "Fallback: Tidak ada siaran live, cek video terbaru..."
-              ); // LOG 4
-              // 2) Tidak live → ambil video terbaru
+              );
               const latestURL = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&type=video&order=date&maxResults=1&key=${apiKey}`;
-              console.log("Fallback: Cek video terbaru di URL:", latestURL); // LOG 5
+              console.log("Fallback: Cek video terbaru di URL:", latestURL);
               res = await fetch(latestURL);
               js = await res.json();
-              console.log("Fallback: Respons dari cek video terbaru:", js); // LOG 6
+              console.log("Fallback: Respons dari cek video terbaru:", js);
               if (Array.isArray(js.items) && js.items.length) {
                 status = "latest";
                 vidId = js.items[0].id && js.items[0].id.videoId;
@@ -1153,9 +1148,7 @@
                 snippet.thumbnails.default.url) ||
               "";
 
-            // samakan shape dengan Apps Script agar bisa dipakai renderYT
             console.log("Fallback: Menyiapkan data untuk dirender...", {
-              // LOG 7
               status,
               video: {
                 id: vidId,
@@ -1182,7 +1175,6 @@
           }
         }
 
-        // 1) Coba JSONP dulu (tidak butuh CORS)
         const YT_JSONP_URL =
           APPS_BASE +
           "?service=yt&channelId=" +
@@ -1192,12 +1184,10 @@
         const s = document.createElement("script");
         s.src = YT_JSONP_URL;
         s.onerror = () => {
-          // kalau script JSONP error (404 / bukan JS), langsung fallback
           fetchYouTubeDirect(CHANNEL_ID, YT_API_KEY);
         };
         document.body.appendChild(s);
 
-        // 2) Kalau 7 detik tidak ada callback JSONP, fallback juga
         setTimeout(() => {
           if (!window.__ytJsonpOk) {
             console.warn(
