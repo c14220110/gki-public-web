@@ -820,10 +820,13 @@
           });
       });
 
-      // === JSONP callback untuk YouTube Spotlight (sekarang dimasukkan ke #warta-grid) ===
+      // === JSONP callback untuk YouTube Spotlight (masuk ke #warta-grid) ===
       function renderYT(data) {
         const grid = document.getElementById("warta-grid");
         if (!grid) return;
+
+        // tandai JSONP sukses
+        window.__ytJsonpOk = true;
 
         // kalau gagal / tak ada video: jangan render apa-apa
         if (!data || data.error || !data.video) return;
@@ -840,9 +843,21 @@
           ? "bg-amber-600"
           : "bg-slate-600";
 
-        // PAKSA thumbnail https supaya tidak ke-block mixed content
-        const finalThumb = v.id
-          ? `https://i.ytimg.com/vi/${v.id}/hqdefault.jpg`
+        // Coba ambil videoId paling aman (id dari payload, atau dari URL ?v=)
+        let videoId = v.id || null;
+        if (!videoId && v.url) {
+          try {
+            const u = new URL(v.url);
+            videoId = u.searchParams.get("v");
+          } catch (e) {
+            const idx = v.url.indexOf("watch?v=");
+            if (idx > -1) videoId = v.url.substring(idx + 8, idx + 19);
+          }
+        }
+
+        // Paksa thumbnail HTTPS dan pasti ada
+        const finalThumb = videoId
+          ? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`
           : String(v.thumbnail || "").replace(/^http:/, "https:");
 
         const whenText = isLive
@@ -866,11 +881,10 @@
                 })
               : "-");
 
-        // Buat kartu dengan ukuran & gaya sama seperti kartu warta (h-56, p-6, dsb)
         const card = document.createElement("div");
         card.className = "glass-card overflow-hidden p-0";
         card.setAttribute("data-animate", "");
-        card.style.transitionDelay = "600ms"; // muncul setelah warta
+        card.style.transitionDelay = "600ms"; // muncul setelah 3 kartu warta
 
         card.innerHTML = `
     <div class="relative">
@@ -886,23 +900,22 @@
     <div class="p-6">
       <span class="text-sm font-semibold" style="color: var(--color-text-accent)">SIARAN DARI YOUTUBE</span>
       <h3 class="text-xl font-bold mt-2" style="color: var(--color-text-main)">${escapeHtml_(
-        v.title
+        v.title || ""
       )}</h3>
       <p class="mt-2" style="color: var(--color-text-secondary)">${whenText}</p>
       <div class="mt-4 flex items-center gap-3">
         <a href="${
-          v.url
-        }" target="_blank" rel="noopener" class="inline-block btn btn-primary">Tonton di YouTube</a>
+          v.url ||
+          (videoId ? `https://www.youtube.com/watch?v=${videoId}` : "#")
+        }"
+           target="_blank" rel="noopener" class="inline-block btn btn-primary">Tonton di YouTube</a>
         <a href="https://www.youtube.com/@gkikutisariindah2685" target="_blank" rel="noopener"
            class="inline-block font-semibold" style="color: var(--color-text-accent)">Kunjungi Channel →</a>
       </div>
     </div>
   `;
 
-        // taruh sebagai kartu ke-4 di grid (jadi posisinya tepat di bawah 3 warta)
         grid.appendChild(card);
-
-        // biar animasinya tetap muncul meski observer belum re-observe
         requestAnimationFrame(() => card.classList.add("is-visible"));
       }
 
@@ -1057,20 +1070,120 @@
             });
         }
 
-        // === YouTube Spotlight (JSONP via Apps Script yang sama) ===
-        // Ambil base dari WARTA_API_URL agar tidak perlu copas URL lain
+        // === YouTube Spotlight (JSONP via Apps Script + Fallback direct API) ===
         const APPS_BASE = WARTA_API_URL.split("?")[0]; // pastikan ujungnya /exec
-        const CHANNEL_ID = "UCLDrtr-jxpA0h9WzmgUiKdQ"; // dari kamu
+        const CHANNEL_ID = "UCLDrtr-jxpA0h9WzmgUiKdQ";
+
+        // >>>> MASUKKAN API KEY-MU DI SINI <<<<
+        // Cara ambil: Google Cloud Console → APIs & Services → Credentials → Create API key.
+        // Aktifkan "YouTube Data API v3" di Library.
+        const YT_API_KEY = "AIzaSyAHfpt1Eqb1yX8iwgTMxUdm-Mxo6nPNhH4";
+
+        // penanda apakah JSONP berhasil memanggil renderYT
+        window.__ytJsonpOk = false;
+
+        // fallback: panggil API YouTube langsung
+        async function fetchYouTubeDirect(channelId, apiKey) {
+          try {
+            if (!apiKey || apiKey === "PASTE_API_KEY_DI_SINI") {
+              console.warn("Tambahkan YT_API_KEY agar fallback bisa jalan.");
+              return;
+            }
+
+            // 1) Cek live dulu
+            const liveURL = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&eventType=live&type=video&order=date&maxResults=1&key=${apiKey}`;
+            let res = await fetch(liveURL);
+            let js = await res.json();
+
+            let status = "latest";
+            let vidId = null;
+            let snippet = {};
+            let liveStreamingDetails = null;
+
+            if (Array.isArray(js.items) && js.items.length) {
+              status = "live";
+              vidId = js.items[0].id && js.items[0].id.videoId;
+              // ambil detail live (jadwal)
+              if (vidId) {
+                const detailURL = `https://www.googleapis.com/youtube/v3/videos?part=snippet,liveStreamingDetails&id=${vidId}&key=${apiKey}`;
+                const r2 = await fetch(detailURL);
+                const j2 = await r2.json();
+                const item = j2.items && j2.items[0];
+                if (item) {
+                  snippet = item.snippet || {};
+                  liveStreamingDetails = item.liveStreamingDetails || null;
+                }
+              }
+            } else {
+              // 2) Tidak live → ambil video terbaru
+              const latestURL = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&type=video&order=date&maxResults=1&key=${apiKey}`;
+              res = await fetch(latestURL);
+              js = await res.json();
+              if (Array.isArray(js.items) && js.items.length) {
+                status = "latest";
+                vidId = js.items[0].id && js.items[0].id.videoId;
+                snippet = js.items[0].snippet || {};
+              } else {
+                console.warn("Channel tidak punya video.");
+                return;
+              }
+            }
+
+            if (!vidId) return;
+
+            const thumb =
+              (snippet.thumbnails &&
+                snippet.thumbnails.high &&
+                snippet.thumbnails.high.url) ||
+              (snippet.thumbnails &&
+                snippet.thumbnails.medium &&
+                snippet.thumbnails.medium.url) ||
+              (snippet.thumbnails &&
+                snippet.thumbnails.default &&
+                snippet.thumbnails.default.url) ||
+              "";
+
+            // samakan shape dengan Apps Script agar bisa dipakai renderYT
+            renderYT({
+              status,
+              video: {
+                id: vidId,
+                title: snippet.title,
+                url: `https://www.youtube.com/watch?v=${vidId}`,
+                publishedAt: snippet.publishedAt,
+                liveDetails: liveStreamingDetails,
+                thumbnail: thumb,
+              },
+            });
+          } catch (e) {
+            console.error("YT API fallback error:", e);
+          }
+        }
+
+        // 1) Coba JSONP dulu (tidak butuh CORS)
         const YT_JSONP_URL =
           APPS_BASE +
           "?service=yt&channelId=" +
           encodeURIComponent(CHANNEL_ID) +
           "&callback=renderYT";
 
-        // Inject <script> JSONP
         const s = document.createElement("script");
         s.src = YT_JSONP_URL;
+        s.onerror = () => {
+          // kalau script JSONP error (404 / bukan JS), langsung fallback
+          fetchYouTubeDirect(CHANNEL_ID, YT_API_KEY);
+        };
         document.body.appendChild(s);
+
+        // 2) Kalau 2 detik tidak ada callback JSONP, fallback juga
+        setTimeout(() => {
+          if (!window.__ytJsonpOk) {
+            console.warn(
+              "JSONP YouTube tidak memanggil renderYT, pakai fallback API."
+            );
+            fetchYouTubeDirect(CHANNEL_ID, YT_API_KEY);
+          }
+        }, 2000);
       });
     </script>
   </body>
