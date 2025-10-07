@@ -522,13 +522,6 @@
             Tetap terhubung dengan berita terbaru dan acara spesial yang akan
             datang di gereja kami.
           </p>
-          <!-- === YouTube Live Spotlight === -->
-          <div
-            id="yt-live"
-            class="mt-10"
-            data-animate
-            style="transition-delay: 0ms"
-          ></div>
 
           <div
             id="warta-grid"
@@ -827,16 +820,13 @@
           });
       });
 
-      // === JSONP callback untuk YouTube Spotlight (harus global) ===
+      // === JSONP callback untuk YouTube Spotlight (sekarang dimasukkan ke #warta-grid) ===
       function renderYT(data) {
-        const wrap = document.getElementById("yt-live");
-        if (!wrap) return;
+        const grid = document.getElementById("warta-grid");
+        if (!grid) return;
 
-        // jika error / tidak ada video, kosongkan saja
-        if (!data || data.error || !data.video) {
-          wrap.innerHTML = "";
-          return;
-        }
+        // kalau gagal / tak ada video: jangan render apa-apa
+        if (!data || data.error || !data.video) return;
 
         const v = data.video || {};
         const status = data.status || "latest"; // 'live' | 'upcoming' | 'latest'
@@ -849,6 +839,11 @@
           : isUpcoming
           ? "bg-amber-600"
           : "bg-slate-600";
+
+        // PAKSA thumbnail https supaya tidak ke-block mixed content
+        const finalThumb = v.id
+          ? `https://i.ytimg.com/vi/${v.id}/hqdefault.jpg`
+          : String(v.thumbnail || "").replace(/^http:/, "https:");
 
         const whenText = isLive
           ? "Sedang live sekarang."
@@ -871,35 +866,44 @@
                 })
               : "-");
 
-        wrap.innerHTML = `
-      <div class="glass-card p-0 overflow-hidden">
-        <div class="flex flex-col md:flex-row">
-          <div class="relative md:w-1/2">
-            <img src="${v.thumbnail}&v=${Date.now()}" alt="${escapeHtml_(
-          v.title
-        )}"
-                 class="w-full h-64 md:h-full object-cover" />
-            <span class="absolute top-3 left-3 text-xs font-bold text-white px-2 py-1 rounded ${badgeClass}">
-              ${badge}
-            </span>
-          </div>
-          <div class="md:w-1/2 p-6 flex flex-col justify-center">
-            <span class="text-sm font-semibold" style="color: var(--color-text-accent)">SIARAN DARI YOUTUBE</span>
-            <h3 class="text-2xl font-bold mt-2" style="color: var(--color-text-main)">${escapeHtml_(
-              v.title
-            )}</h3>
-            <p class="mt-2 text-sm" style="color: var(--color-text-secondary)">${whenText}</p>
-            <div class="mt-4 flex items-center gap-3">
-              <a href="${
-                v.url
-              }" target="_blank" rel="noopener" class="btn btn-primary">Tonton di YouTube</a>
-              <a href="https://www.youtube.com/@gkikutisariindah2685" target="_blank" rel="noopener"
-                 class="font-semibold" style="color: var(--color-text-accent)">Kunjungi Channel →</a>
-            </div>
-          </div>
-        </div>
+        // Buat kartu dengan ukuran & gaya sama seperti kartu warta (h-56, p-6, dsb)
+        const card = document.createElement("div");
+        card.className = "glass-card overflow-hidden p-0";
+        card.setAttribute("data-animate", "");
+        card.style.transitionDelay = "600ms"; // muncul setelah warta
+
+        card.innerHTML = `
+    <div class="relative">
+      <img
+        src="${finalThumb}&v=${Date.now()}"
+        alt="${escapeHtml_(v.title)}"
+        class="w-full h-56 object-cover"
+      />
+      <span class="absolute top-3 left-3 text-xs font-bold text-white px-2 py-1 rounded ${badgeClass}">
+        ${badge}
+      </span>
+    </div>
+    <div class="p-6">
+      <span class="text-sm font-semibold" style="color: var(--color-text-accent)">SIARAN DARI YOUTUBE</span>
+      <h3 class="text-xl font-bold mt-2" style="color: var(--color-text-main)">${escapeHtml_(
+        v.title
+      )}</h3>
+      <p class="mt-2" style="color: var(--color-text-secondary)">${whenText}</p>
+      <div class="mt-4 flex items-center gap-3">
+        <a href="${
+          v.url
+        }" target="_blank" rel="noopener" class="inline-block btn btn-primary">Tonton di YouTube</a>
+        <a href="https://www.youtube.com/@gkikutisariindah2685" target="_blank" rel="noopener"
+           class="inline-block font-semibold" style="color: var(--color-text-accent)">Kunjungi Channel →</a>
       </div>
-    `;
+    </div>
+  `;
+
+        // taruh sebagai kartu ke-4 di grid (jadi posisinya tepat di bawah 3 warta)
+        grid.appendChild(card);
+
+        // biar animasinya tetap muncul meski observer belum re-observe
+        requestAnimationFrame(() => card.classList.add("is-visible"));
       }
 
       // kecil: escape teks agar aman dimasukkan ke HTML
