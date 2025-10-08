@@ -963,39 +963,75 @@
                 })
               : "-");
 
+        // --- Gunakan DOM creation untuk menghindari escaping issues ---
         const card = document.createElement("div");
         card.className =
           "glass-card overflow-hidden p-0 youtube-spotlight-card text-left md:max-w-2xl w-full";
         card.setAttribute("data-animate", "");
 
-        card.innerHTML = `
-    <div class="relative">
-      <img
-        src="${finalThumb}"
-        alt="${escapeHtml_(v.title)}"
-        class="w-full h-56 object-cover"
-      />
-      <span class="absolute top-3 left-3 text-xs font-bold text-white px-2 py-1 rounded ${badgeClass}">
-        ${badge}
-      </span>
-    </div>
-    <div class="p-6">
-      <span class="text-sm font-semibold" style="color: var(--color-text-accent)">SIARAN DARI YOUTUBE</span>
-      <h3 class="text-xl font-bold mt-2" style="color: var(--color-text-main)">${escapeHtml_(
-        v.title || ""
-      )}</h3>
-      <p class="mt-2" style="color: var(--color-text-secondary)">${whenText}</p>
-      <div class="mt-4 flex items-center gap-3">
-        <a href="${
+        // Image wrapper
+        const imgWrapper = document.createElement("div");
+        imgWrapper.className = "relative";
+
+        const img = document.createElement("img");
+        img.src = finalThumb;
+        img.alt = v.title || ""; // Alt text langsung, browser handle entities
+        img.className = "w-full h-56 object-cover";
+        imgWrapper.appendChild(img);
+
+        const badgeSpan = document.createElement("span");
+        badgeSpan.className = `absolute top-3 left-3 text-xs font-bold text-white px-2 py-1 rounded ${badgeClass}`;
+        badgeSpan.textContent = badge; // textContent untuk teks raw
+        imgWrapper.appendChild(badgeSpan);
+
+        card.appendChild(imgWrapper);
+
+        // Content div
+        const contentDiv = document.createElement("div");
+        contentDiv.className = "p-6";
+
+        const spanType = document.createElement("span");
+        spanType.className = "text-sm font-semibold";
+        spanType.style.color = "var(--color-text-accent)";
+        spanType.textContent = "SIARAN DARI YOUTUBE";
+        contentDiv.appendChild(spanType);
+
+        const h3 = document.createElement("h3");
+        h3.className = "text-xl font-bold mt-2";
+        h3.style.color = "var(--color-text-main)";
+        h3.textContent = v.title || ""; // textContent untuk judul raw, tanpa escaping
+        contentDiv.appendChild(h3);
+
+        const pWhen = document.createElement("p");
+        pWhen.className = "mt-2";
+        pWhen.style.color = "var(--color-text-secondary)";
+        pWhen.textContent = whenText;
+        contentDiv.appendChild(pWhen);
+
+        const actionsDiv = document.createElement("div");
+        actionsDiv.className = "mt-4 flex items-center gap-3";
+
+        const aWatch = document.createElement("a");
+        aWatch.href =
           v.url ||
-          (videoId ? `https://www.youtube.com/watch?v=${videoId}` : "#")
-        }"
-           target="_blank" rel="noopener" class="inline-block btn btn-primary">Tonton di YouTube</a>
-        <a href="https://www.youtube.com/@gkikutisariindah2685" target="_blank" rel="noopener"
-           class="inline-block font-semibold" style="color: var(--color-text-accent)">Kunjungi Channel →</a>
-      </div>
-    </div>
-  `;
+          (videoId ? `https://www.youtube.com/watch?v=${videoId}` : "#");
+        aWatch.target = "_blank";
+        aWatch.rel = "noopener";
+        aWatch.className = "inline-block btn btn-primary";
+        aWatch.textContent = "Tonton di YouTube";
+        actionsDiv.appendChild(aWatch);
+
+        const aChannel = document.createElement("a");
+        aChannel.href = "https://www.youtube.com/@gkikutisariindah2685";
+        aChannel.target = "_blank";
+        aChannel.rel = "noopener";
+        aChannel.className = "inline-block font-semibold";
+        aChannel.style.color = "var(--color-text-accent)";
+        aChannel.textContent = "Kunjungi Channel →";
+        actionsDiv.appendChild(aChannel);
+
+        contentDiv.appendChild(actionsDiv);
+        card.appendChild(contentDiv);
 
         grid.appendChild(card);
         if (observer) {
