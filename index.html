@@ -5,323 +5,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>GKI Kutisari Indah | Gereja Modern di Surabaya</title>
 
-    <!-- Tailwind CSS (External) -->
+    <!-- Tailwind CSS (CDN; aman dipakai dulu, warning bisa diabaikan) -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- GSAP (GreenSock Animation Platform) (External) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 
-    <!-- Elfsight platform script (cukup sekali per halaman) -->
+    <!-- GSAP -->
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"
+      defer
+    ></script>
+
+    <!-- Elfsight (Instagram) -->
     <script src="https://elfsightcdn.com/platform.js" async></script>
 
-    <!-- Google Fonts -->
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-    <!-- Font for Preloader -->
-    <link
-      href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Oswald:wght@700&display=swap"
       rel="stylesheet"
     />
 
-    <style>
-      /* --- START: Color Scheme Setup --- */
-      :root {
-        /* Light Mode Variables */
-        --color-text-main: #1f2937; /* gray-800 */
-        --color-text-secondary: #4b5563; /* gray-600 */
-        --color-text-accent: #d97706; /* amber-600 */
-        --color-background: #ffffff;
-        --color-surface-glass: rgba(255, 255, 255, 0.3);
-        --color-border-glass: rgba(255, 255, 255, 0.4);
-        --color-footer-bg: #1f2937;
-        --color-footer-text: #d1d5db; /* gray-300 */
-      }
-
-      @media (prefers-color-scheme: dark) {
-        :root {
-          /* Dark Mode Variables */
-          --color-text-main: #f9fafb; /* gray-50 */
-          --color-text-secondary: #9ca3af; /* gray-400 */
-          --color-text-accent: #f59e0b; /* amber-500 */
-          --color-background: #111827; /* gray-900 */
-          --color-surface-glass: rgba(
-            31,
-            41,
-            55,
-            0.3
-          ); /* gray-800 with opacity */
-          --color-border-glass: rgba(
-            55,
-            65,
-            81,
-            0.4
-          ); /* gray-700 with opacity */
-          --color-footer-bg: #030712; /* gray-950 */
-          --color-footer-text: #9ca3af; /* gray-400 */
-        }
-      }
-      /* --- END: Color Scheme Setup --- */
-
-      body {
-        font-family: "Inter", sans-serif;
-        background-color: var(--color-background);
-        color: var(--color-text-main);
-        overflow-x: hidden;
-      }
-
-      /* --- START: New Preloader Styles --- */
-      #preloader {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        z-index: 9999;
-        background-color: var(--color-background);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        font-family: "Oswald", "Bebas Neue", sans-serif;
-      }
-
-      .loader-text-line {
-        display: flex;
-        font-size: 6.5rem;
-        font-weight: 700;
-        position: relative;
-        overflow: hidden;
-      }
-
-      .loader-text-line span {
-        display: inline-block;
-        position: relative;
-        color: rgba(var(--color-text-main-rgb, 31, 41, 55), 0.2);
-        line-height: 1;
-        transform: translateY(110px);
-        --clipPath: inset(100% 0 0 0);
-      }
-
-      @media (prefers-color-scheme: dark) {
-        .loader-text-line span {
-          color: rgba(249, 250, 251, 0.2); /* gray-50 with opacity */
-        }
-      }
-
-      .loader-text-line span::before {
-        content: attr(data-text);
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        background-image: linear-gradient(
-          45deg,
-          #b45309,
-          #d97706,
-          #f59e0b,
-          #fbbf24
-        );
-        background-clip: text;
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        clip-path: var(--clipPath);
-        -webkit-clip-path: var(--clipPath);
-        transition: clip-path 0s;
-      }
-      /* --- END: New Preloader Styles --- */
-
-      /* --- START: Initial Animation States --- */
-      main,
-      #header {
-        opacity: 0;
-      }
-      /* --- END: Initial Animation States --- */
-
-      /* Animated Aurora Background */
-      body::before {
-        content: "";
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background: radial-gradient(
-            circle at 15% 50%,
-            rgba(217, 119, 6, 0.15),
-            rgba(217, 119, 6, 0) 25%
-          ),
-          radial-gradient(
-            circle at 85% 30%,
-            rgba(59, 130, 246, 0.15),
-            rgba(59, 130, 246, 0) 25%
-          );
-        z-index: -1;
-        animation: animate-aurora 15s infinite linear;
-      }
-      @keyframes animate-aurora {
-        0% {
-          transform: rotate(0deg);
-        }
-        100% {
-          transform: rotate(360deg);
-        }
-      }
-
-      /* Glassmorphism Card Style */
-      .glass-card {
-        background: var(--color-surface-glass);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid var(--color-border-glass);
-        border-radius: 1.25rem;
-        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
-        transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-      }
-
-      .glass-card:hover {
-        transform: translateY(-8px) scale(1.02);
-        box-shadow: 0 16px 40px 0 rgba(31, 38, 135, 0.15);
-      }
-
-      /* Header glass style */
-      .header-glass {
-        background: var(--color-surface-glass);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border-bottom: 1px solid var(--color-border-glass);
-      }
-
-      /* Hero Video Styling */
-      #heroVideo {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        min-width: 100%;
-        min-height: 100%;
-        width: auto;
-        height: auto;
-        z-index: 0;
-        transform: translateX(-50%) translateY(-50%);
-        object-fit: cover;
-      }
-      .hero-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: rgba(0, 0, 0, 0.4);
-        z-index: 1;
-      }
-      .hero-content {
-        position: relative;
-        z-index: 2;
-      }
-
-      /* Section Titles */
-      .section-title {
-        font-weight: 700;
-        font-size: 2.5rem;
-        color: var(--color-text-main);
-      }
-      .section-subtitle {
-        font-size: 1.125rem;
-        color: var(--color-text-secondary);
-        margin-top: 1rem;
-      }
-
-      /* Buttons */
-      .btn {
-        display: inline-block;
-        padding: 0.8rem 1.75rem;
-        border-radius: 9999px;
-        font-weight: 600;
-        text-align: center;
-        transition: all 0.3s ease-in-out;
-        cursor: pointer;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-      }
-      .btn-primary {
-        background-color: var(--color-text-accent);
-        color: #fff;
-      }
-      .btn-primary:hover {
-        background-color: #b45309;
-        transform: translateY(-3px);
-        box-shadow: 0 7px 20px rgba(217, 119, 6, 0.4);
-      }
-      .btn-secondary {
-        background-color: transparent;
-        color: #fff;
-        border: 2px solid #fff;
-      }
-      .btn-secondary:hover {
-        background-color: #fff;
-        color: #111827;
-        transform: translateY(-3px);
-      }
-
-      /* Navigation Links */
-      .nav-link {
-        position: relative;
-        transition: color 0.3s ease;
-        color: var(--color-text-secondary);
-      }
-      .nav-link::after {
-        content: "";
-        position: absolute;
-        width: 0;
-        height: 2px;
-        bottom: -4px;
-        left: 50%;
-        transform: translateX(-50%);
-        background-color: var(--color-text-accent);
-        transition: width 0.3s ease;
-      }
-      .nav-link:hover {
-        color: var(--color-text-main);
-      }
-      .nav-link:hover::after {
-        width: 100%;
-      }
-
-      /* Scroll Animation */
-      [data-animate] {
-        opacity: 0;
-        transform: translateY(30px);
-        transition: opacity 0.8s ease-out, transform 0.8s ease-out;
-      }
-      [data-animate].is-visible {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    </style>
+    <!-- Styles (pindahan dari <style>) -->
+    <link rel="stylesheet" href="css/styles.css" />
   </head>
   <body class="antialiased">
-    <!-- Preloader Start -->
+    <!-- Preloader -->
     <div id="preloader">
       <div class="loader-text-line">
-        <span data-text="G">G</span>
-        <span data-text="K">K</span>
-        <span data-text="I">I</span>
+        <span data-text="G">G</span><span data-text="K">K</span
+        ><span data-text="I">I</span>
       </div>
       <div class="loader-text-line">
-        <span data-text="K">K</span>
-        <span data-text="U">U</span>
-        <span data-text="T">T</span>
-        <span data-text="I">I</span>
-        <span data-text="S">S</span>
-        <span data-text="A">A</span>
-        <span data-text="R">R</span>
-        <span data-text="I">I</span>
+        <span data-text="K">K</span><span data-text="U">U</span
+        ><span data-text="T">T</span> <span data-text="I">I</span
+        ><span data-text="S">S</span><span data-text="A">A</span>
+        <span data-text="R">R</span><span data-text="I">I</span>
       </div>
     </div>
-    <!-- Preloader End -->
 
+    <!-- Header -->
     <header
       id="header"
       class="header-glass sticky top-0 z-50 transition-shadow duration-300"
@@ -369,7 +91,6 @@
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
             >
               <path
                 stroke-linecap="round"
@@ -381,6 +102,7 @@
           </button>
         </div>
       </div>
+
       <div id="mobile-menu" class="hidden md:hidden px-6 pb-4">
         <a href="#beranda" class="block py-2 font-semibold nav-link">Beranda</a>
         <a href="#tentang" class="block py-2 font-semibold nav-link"
@@ -400,6 +122,7 @@
     </header>
 
     <main>
+      <!-- Beranda / Hero -->
       <section
         id="beranda"
         class="relative h-screen flex items-center justify-center text-white text-center overflow-hidden"
@@ -439,6 +162,7 @@
         </div>
       </section>
 
+      <!-- Jadwal -->
       <section id="jadwal" class="py-24">
         <div class="container mx-auto px-6 text-center">
           <h2 data-animate class="section-title">Jadwal Ibadah & Kegiatan</h2>
@@ -446,6 +170,7 @@
             Kami mengundang Anda untuk bersekutu bersama kami. Berikut adalah
             jadwal kegiatan rutin kami.
           </p>
+
           <div
             class="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 text-left"
           >
@@ -463,10 +188,10 @@
                 Setiap Minggu, 07:00 WIB
               </p>
               <p class="mt-4" style="color: var(--color-text-secondary)">
-                Ibadah pagi yang penuh sukacita untuk memulai hari Minggu Anda
-                dengan firman Tuhan.
+                Ibadah pagi untuk memulai hari Minggu Anda.
               </p>
             </div>
+
             <div
               data-animate
               style="transition-delay: 200ms"
@@ -485,10 +210,10 @@
                 Setiap Minggu, 09:00 WIB
               </p>
               <p class="mt-4" style="color: var(--color-text-secondary)">
-                Ibadah dengan suasana yang lebih kontemporer, cocok untuk
-                keluarga dan kaum muda.
+                Suasana kontemporer, cocok untuk keluarga & kaum muda.
               </p>
             </div>
+
             <div
               data-animate
               style="transition-delay: 400ms"
@@ -507,12 +232,12 @@
                 Setiap Minggu, 17:00 WIB
               </p>
               <p class="mt-4" style="color: var(--color-text-secondary)">
-                Ibadah sore yang khidmat untuk menutup akhir pekan Anda dalam
-                hadirat Tuhan.
+                Ibadah sore yang khidmat menutup akhir pekan Anda.
               </p>
             </div>
           </div>
-          <!-- Container for YouTube Spotlight -->
+
+          <!-- YouTube Spotlight -->
           <div
             id="youtube-spotlight-container"
             class="mt-16 grid justify-center"
@@ -520,14 +245,14 @@
         </div>
       </section>
 
+      <!-- Warta -->
       <section id="warta" class="py-24">
         <div class="container mx-auto px-6 text-center">
           <h2 data-animate class="section-title">Warta & Acara Mendatang</h2>
           <p data-animate class="section-subtitle max-w-3xl mx-auto">
-            Tetap terhubung dengan berita terbaru dan acara spesial yang akan
-            datang di gereja kami.
+            Tetap terhubung dengan berita terbaru dan acara spesial di gereja
+            kami.
           </p>
-
           <div
             id="warta-grid"
             class="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 text-left"
@@ -535,9 +260,9 @@
         </div>
       </section>
 
+      <!-- Tentang -->
       <section id="tentang" class="py-24">
         <div class="container mx-auto px-6">
-          <!-- Bagian Tentang Gereja -->
           <div
             class="flex flex-col md:flex-row items-center gap-12 lg:gap-20 mb-20"
           >
@@ -559,20 +284,16 @@
                 class="mt-4 text-lg"
                 style="color: var(--color-text-secondary)"
               >
-                GKI Kutisari Indah adalah komunitas orang percaya yang
-                berkomitmen untuk bertumbuh dalam pengenalan akan Kristus,
-                saling mengasihi, dan melayani masyarakat Surabaya.
+                Komunitas yang bertumbuh dalam pengenalan akan Kristus, saling
+                mengasihi, dan melayani.
               </p>
               <p class="mt-4" style="color: var(--color-text-secondary)">
-                Visi kami adalah menjadi gereja yang relevan, berdampak, dan
-                menjadi berkat. Kami percaya setiap orang berharga di mata Tuhan
-                dan memiliki tempat dalam keluarga besar kami.
+                Visi kami: gereja yang relevan, berdampak, dan menjadi berkat.
               </p>
               <a href="#" class="btn btn-primary mt-8">Visi, Misi & Sejarah</a>
             </div>
           </div>
 
-          <!-- Bagian Profil Gembala Sidang -->
           <div
             class="flex flex-col md:flex-row-reverse items-center gap-12 lg:gap-20"
           >
@@ -611,56 +332,40 @@
                   href="tel:087808786969"
                   class="text-lg font-semibold"
                   style="color: var(--color-text-accent)"
+                  >087808786969</a
                 >
-                  087808786969
-                </a>
               </div>
               <p
                 class="mt-6 text-lg leading-relaxed"
                 style="color: var(--color-text-secondary)"
               >
-                Pdt. William Suryajaya adalah gembala sidang yang memimpin GKI
-                Kutisari Indah dengan penuh dedikasi dan kasih. Beliau
-                berkomitmen untuk membimbing jemaat dalam pertumbuhan rohani dan
-                melayani dengan hati yang tulus.
-              </p>
-              <p
-                class="mt-4 leading-relaxed"
-                style="color: var(--color-text-secondary)"
-              >
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
-                eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-                enim ad minim veniam, quis nostrud exercitation ullamco laboris
-                nisi ut aliquip ex ea commodo consequat.
+                Gembala sidang yang memimpin dengan dedikasi dan kasih,
+                membimbing jemaat dalam pertumbuhan rohani.
               </p>
               <a
                 href="https://wa.me/6287808786969"
                 target="_blank"
                 class="btn btn-primary mt-8"
+                >Hubungi Pendeta</a
               >
-                Hubungi Pendeta
-              </a>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- ===================== GALERI ===================== -->
+      <!-- Galeri -->
       <section id="galeri" class="py-24">
         <div class="container mx-auto px-6 text-center">
           <h2 data-animate class="section-title">Galeri Kegiatan</h2>
           <p data-animate class="section-subtitle max-w-3xl mx-auto">
-            Momen kebersamaan dan sukacita dalam berbagai kegiatan gereja kami.
+            Momen kebersamaan dan sukacita di gereja kami.
           </p>
 
-          <!-- Elfsight Instagram Feed (3 postingan terbaru) -->
           <div data-animate class="mt-16">
-            <!-- container widget -->
             <div
               class="elfsight-app-e3036a96-86a2-4869-8b3b-dd700ccf329e"
               data-elfsight-app-lazy
             ></div>
-
             <noscript>
               <p class="mt-4 text-sm">
                 Aktifkan JavaScript untuk melihat galeri.
@@ -686,17 +391,17 @@
           </div>
         </div>
       </section>
-      <!-- =================== END GALERI =================== -->
 
+      <!-- Kontak -->
       <section id="kontak" class="py-24">
         <div class="container mx-auto px-6">
           <div class="text-center mb-16">
             <h2 data-animate class="section-title">Hubungi & Kunjungi Kami</h2>
             <p data-animate class="section-subtitle max-w-3xl mx-auto">
-              Kami senang dapat terhubung dengan Anda. Jangan ragu untuk
-              menghubungi kami atau datang langsung.
+              Kami senang dapat terhubung dengan Anda.
             </p>
           </div>
+
           <div data-animate class="glass-card p-8 lg:p-12">
             <div class="flex flex-col lg:flex-row gap-8 lg:gap-12">
               <div class="lg:w-1/2 space-y-8">
@@ -720,7 +425,7 @@
                     Kantor Gereja
                   </h3>
                   <p class="mt-1" style="color: var(--color-text-secondary)">
-                    Hubungi kami untuk informasi umum dan administrasi.
+                    Hubungi kami untuk informasi umum & administrasi.
                   </p>
                   <a
                     href="https://wa.me/6281332240711"
@@ -742,6 +447,7 @@
                   </a>
                 </div>
               </div>
+
               <div class="lg:w-1/2 h-96 rounded-2xl overflow-hidden shadow-lg">
                 <iframe
                   src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3957.1456284476158!2d112.75122710943965!3d-7.337537692640396!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2dd7fb31c4cd963b%3A0x3d1b8b29fc6e3a11!2sGereja%20Kristen%20Indonesia%20Kutisari!5e0!3m2!1sen!2sid!4v1752597268143!5m2!1sen!2sid"
@@ -758,6 +464,7 @@
       </section>
     </main>
 
+    <!-- Footer -->
     <footer
       style="
         background-color: var(--color-footer-bg);
@@ -823,7 +530,7 @@
               >
                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                   <path
-                    d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.85s-.011 3.584-.069 4.85c-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07s-3.584-.012-4.85-.07c-3.252-.148-4.771-1.691-4.919-4.919-.058-1.265-.069-1.645-.069-4.85s.011-3.584.069-4.85c.149-3.225 1.664 4.771 4.919 4.919 1.266-.057 1.644-.069 4.85-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948s.014 3.667.072 4.947c.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072s3.667-.014 4.947-.072c4.358-.2 6.78-2.618 6.98-6.98.59-1.281.073-1.689.073-4.948s-.014-3.667-.072-4.947c-.2-4.358-2.618-6.78-6.98-6.98-1.281-.059-1.689-.073-4.948-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.162 6.162 6.162 6.162-2.759 6.162-6.162-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4s1.791-4 4-4 4 1.79 4 4-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44 1.441-.645 1.441-1.44-.645-1.44-1.441-1.44z"
+                    d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.69 4.85s-.011 3.584-.069 4.85c-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07s-3.584-.012-4.85-.07c-3.252-.148-4.771-1.691-4.919-4.919-.058-1.265-.069-1.645-.069-4.85s.011-3.584.069-4.85c.149-3.225 1.664-4.771 4.919-4.919 1.281-.059 1.689-.073 4.948-.073zM12 6a6 6 0 100 12 6 6 0 000-12z"
                   />
                 </svg>
               </a>
@@ -834,7 +541,7 @@
               >
                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                   <path
-                    d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v2.385z"
+                    d="M9 8H6v4h3v12h5V12h3.642l.358-4H14V6.333C14 5.378 14.192 5 15.115 5H18V0h-3.808C10.596 0 9 1.583 9 4.615V8z"
                   />
                 </svg>
               </a>
@@ -853,438 +560,7 @@
       </div>
     </footer>
 
-    <script>
-      // --- New Preloader Logic ---
-      window.addEventListener("load", () => {
-        const preloader = document.getElementById("preloader");
-        const letters = document.querySelectorAll(".loader-text-line span");
-        const mainContent = document.querySelector("main");
-        const header = document.getElementById("header");
-
-        const tl = gsap.timeline({
-          onComplete: () => {
-            gsap.to(preloader, {
-              duration: 0.5,
-              opacity: 0,
-              onComplete: () => {
-                preloader.style.display = "none";
-              },
-            });
-            gsap.to([header, mainContent], {
-              duration: 0.8,
-              opacity: 1,
-              delay: 0.2,
-            });
-          },
-        });
-
-        tl.to(letters, {
-          duration: 0.6,
-          y: 0,
-          stagger: 0.05,
-          ease: "power2.out",
-        })
-          .to(letters, {
-            "--clipPath": "inset(0% 0 0 0)",
-            duration: 0.8,
-            delay: 0.3,
-            ease: "power1.inOut",
-          })
-          .to(letters, {
-            duration: 0.6,
-            y: -110,
-            stagger: 0.05,
-            delay: 0.8,
-            ease: "power2.in",
-          });
-      });
-
-      // Variable for the observer, defined in a wider scope
-      let observer;
-
-      // === JSONP callback untuk YouTube Spotlight ===
-      function renderYT(data) {
-        const grid = document.getElementById("youtube-spotlight-container");
-        if (!grid) return;
-
-        if (document.querySelector(".youtube-spotlight-card")) {
-          return;
-        }
-
-        window.__ytJsonpOk = true;
-
-        if (!data || data.error || !data.video) return;
-
-        const v = data.video || {};
-        const status = data.status || "latest";
-        const isLive = status === "live";
-        const isUpcoming = status === "upcoming";
-
-        const badge = isLive ? "LIVE" : isUpcoming ? "SEGERA" : "TERBARU";
-        const badgeClass = isLive
-          ? "bg-red-600"
-          : isUpcoming
-          ? "bg-amber-600"
-          : "bg-slate-600";
-
-        let videoId = v.id || null;
-        if (!videoId && v.url) {
-          try {
-            const u = new URL(v.url);
-            videoId = u.searchParams.get("v");
-          } catch (e) {
-            const idx = v.url.indexOf("watch?v=");
-            if (idx > -1) videoId = v.url.substring(idx + 8, idx + 19);
-          }
-        }
-
-        const finalThumb = videoId
-          ? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`
-          : String(v.thumbnail || "").replace(/^http:/, "https:");
-
-        const whenText = isLive
-          ? "Sedang live sekarang."
-          : isUpcoming && v.liveDetails && v.liveDetails.scheduledStartTime
-          ? "Tayang: " +
-            new Date(v.liveDetails.scheduledStartTime).toLocaleString("id-ID", {
-              weekday: "long",
-              day: "2-digit",
-              month: "long",
-              year: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
-            })
-          : "Diunggah: " +
-            (v.publishedAt
-              ? new Date(v.publishedAt).toLocaleDateString("id-ID", {
-                  day: "2-digit",
-                  month: "long",
-                  year: "numeric",
-                })
-              : "-");
-
-        // --- Gunakan DOM creation untuk menghindari escaping issues ---
-        const card = document.createElement("div");
-        card.className =
-          "glass-card overflow-hidden p-0 youtube-spotlight-card text-left md:max-w-2xl w-full";
-        card.setAttribute("data-animate", "");
-
-        // Image wrapper
-        const imgWrapper = document.createElement("div");
-        imgWrapper.className = "relative";
-
-        const img = document.createElement("img");
-        img.src = finalThumb;
-        img.alt = v.title || ""; // Alt text langsung, browser handle entities
-        img.className = "w-full h-56 object-cover";
-        imgWrapper.appendChild(img);
-
-        const badgeSpan = document.createElement("span");
-        badgeSpan.className = `absolute top-3 left-3 text-xs font-bold text-white px-2 py-1 rounded ${badgeClass}`;
-        badgeSpan.textContent = badge; // textContent untuk teks raw
-        imgWrapper.appendChild(badgeSpan);
-
-        card.appendChild(imgWrapper);
-
-        // Content div
-        const contentDiv = document.createElement("div");
-        contentDiv.className = "p-6";
-
-        const spanType = document.createElement("span");
-        spanType.className = "text-sm font-semibold";
-        spanType.style.color = "var(--color-text-accent)";
-        spanType.textContent = "SIARAN DARI YOUTUBE";
-        contentDiv.appendChild(spanType);
-
-        const h3 = document.createElement("h3");
-        h3.className = "text-xl font-bold mt-2";
-        h3.style.color = "var(--color-text-main)";
-        h3.textContent = v.title || ""; // textContent untuk judul raw, tanpa escaping
-        contentDiv.appendChild(h3);
-
-        const pWhen = document.createElement("p");
-        pWhen.className = "mt-2";
-        pWhen.style.color = "var(--color-text-secondary)";
-        pWhen.textContent = whenText;
-        contentDiv.appendChild(pWhen);
-
-        const actionsDiv = document.createElement("div");
-        actionsDiv.className = "mt-4 flex items-center gap-3";
-
-        const aWatch = document.createElement("a");
-        aWatch.href =
-          v.url ||
-          (videoId ? `https://www.youtube.com/watch?v=${videoId}` : "#");
-        aWatch.target = "_blank";
-        aWatch.rel = "noopener";
-        aWatch.className = "inline-block btn btn-primary";
-        aWatch.textContent = "Tonton di YouTube";
-        actionsDiv.appendChild(aWatch);
-
-        const aChannel = document.createElement("a");
-        aChannel.href = "https://www.youtube.com/@gkikutisariindah2685";
-        aChannel.target = "_blank";
-        aChannel.rel = "noopener";
-        aChannel.className = "inline-block font-semibold";
-        aChannel.style.color = "var(--color-text-accent)";
-        aChannel.textContent = "Kunjungi Channel →";
-        actionsDiv.appendChild(aChannel);
-
-        contentDiv.appendChild(actionsDiv);
-        card.appendChild(contentDiv);
-
-        grid.appendChild(card);
-        if (observer) {
-          observer.observe(card);
-        }
-      }
-
-      function escapeHtml_(s) {
-        return (s || "").replace(
-          /[&<>"']/g,
-          (m) =>
-            ({
-              "&": "&amp;",
-              "<": "&lt;",
-              ">": "&gt;",
-              '"': "&quot;",
-              "'": "&#39;",
-            }[m])
-        );
-      }
-
-      document.addEventListener("DOMContentLoaded", () => {
-        const mobileMenuButton = document.getElementById("mobile-menu-button");
-        const mobileMenu = document.getElementById("mobile-menu");
-        mobileMenuButton.addEventListener("click", () => {
-          mobileMenu.classList.toggle("hidden");
-        });
-
-        document.querySelectorAll("#mobile-menu a").forEach((link) => {
-          link.addEventListener("click", () => {
-            mobileMenu.classList.add("hidden");
-          });
-        });
-
-        document.getElementById("year").textContent = new Date().getFullYear();
-
-        observer = new IntersectionObserver(
-          (entries) => {
-            entries.forEach((entry) => {
-              if (entry.isIntersecting) {
-                const delay = entry.target.style.transitionDelay
-                  ? parseInt(entry.target.style.transitionDelay)
-                  : 0;
-                setTimeout(() => {
-                  entry.target.classList.add("is-visible");
-                }, delay);
-                observer.unobserve(entry.target);
-              }
-            });
-          },
-          { threshold: 0.1 }
-        );
-
-        function observeAnimated(container = document) {
-          container
-            .querySelectorAll("[data-animate]:not(.is-visible)")
-            .forEach((el) => observer.observe(el));
-        }
-
-        observeAnimated(document);
-
-        const header = document.getElementById("header");
-        window.addEventListener("scroll", () => {
-          if (window.scrollY > 10) header.classList.add("shadow-lg");
-          else header.classList.remove("shadow-lg");
-        });
-
-        const WARTA_API_URL =
-          "https://script.google.com/macros/s/-txrhv60IKkovZCLX3F0dxwcZHGmQjMkwYIEW46g/exec";
-
-        const wartaGrid = document.getElementById("warta-grid");
-
-        function formatTanggalID(dateStr) {
-          const d = new Date(dateStr);
-          return d.toLocaleDateString("id-ID", {
-            weekday: "long",
-            day: "2-digit",
-            month: "long",
-            year: "numeric",
-          });
-        }
-
-        function renderWartaCard(item, idx) {
-          const delay = idx === 1 ? "200ms" : idx === 2 ? "400ms" : "0ms";
-          const card = document.createElement("div");
-          card.className = "glass-card overflow-hidden p-0";
-          card.setAttribute("data-animate", "");
-          card.style.transitionDelay = delay;
-
-          card.innerHTML = `
-        <img src="${item.thumbnailUrl}&v=${Date.now()}" alt="${
-            item.name
-          }" class="w-full h-56 object-cover" />
-        <div class="p-6">
-          <span class="text-sm font-semibold" style="color: var(--color-text-accent)">PENGUMUMUMAN</span>
-          <h3 class="text-xl font-bold mt-2" style="color: var(--color-text-main)">${
-            item.name || "Warta Jemaat"
-          }</h3>
-          <p class="mt-2" style="color: var(--color-text-secondary)">
-            Terakhir diperbarui: ${
-              item.modifiedTime ? formatTanggalID(item.modifiedTime) : "-"
-            }
-          </p>
-          <div class="mt-4 flex items-center gap-3">
-            <a href="${
-              item.downloadUrl
-            }" target="_blank" rel="noopener" class="inline-block font-semibold" style="color: var(--color-text-accent)">Unduh Warta →</a>
-            <a href="${
-              item.viewUrl
-            }" target="_blank" rel="noopener" class="inline-block text-sm underline opacity-80 hover:opacity-100" style="color: var(--color-text-secondary)">Lihat Pratinjau</a>
-          </div>
-        </div>
-      `;
-          return card;
-        }
-
-        if (WARTA_API_URL && wartaGrid) {
-          fetch(WARTA_API_URL)
-            .then((r) => r.json())
-            .then((data) => {
-              if (!data || !Array.isArray(data.files)) {
-                throw new Error("Invalid JSON from Warta feed");
-              }
-              const files = data.files;
-              wartaGrid.innerHTML = "";
-
-              if (files.length > 0) {
-                files.forEach((item, idx) => {
-                  const card = renderWartaCard(item, idx);
-                  wartaGrid.appendChild(card);
-                });
-              } else {
-                wartaGrid.innerHTML = `<div class="text-center col-span-3"><p style="color: var(--color-text-secondary)">Belum ada Warta terbaru.</p></div>`;
-              }
-              observeAnimated(wartaGrid);
-            })
-            .catch((err) => {
-              console.error("Warta feed error:", err);
-              wartaGrid.innerHTML = `<div class="text-center col-span-3"><p style="color: var(--color-text-secondary)">Gagal memuat Warta Jemaat.</p></div>`;
-            });
-        }
-
-        const APPS_BASE = WARTA_API_URL.split("?")[0];
-        const CHANNEL_ID = "UCLDrtr-jxpA0h9WzmgUiKdQ";
-        const YT_API_KEY = "AIzaSyDXjJ8hNVO9x4OD3VfPuofEpVKl9GXfzKM";
-        window.__ytJsonpOk = false;
-
-        async function fetchYouTubeDirect(channelId, apiKey) {
-          if (document.querySelector(".youtube-spotlight-card")) return;
-
-          let status = "latest";
-          let vidId = null;
-          let snippet = {};
-          let liveStreamingDetails = null;
-
-          // Step 1: Try to fetch LIVE video
-          try {
-            const liveURL = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&eventType=live&type=video&order=date&maxResults=1&key=${apiKey}`;
-            const liveRes = await fetch(liveURL);
-            if (!liveRes.ok)
-              throw new Error(`HTTP error! status: ${liveRes.status}`);
-            const liveJs = await liveRes.json();
-
-            if (Array.isArray(liveJs.items) && liveJs.items.length) {
-              status = "live";
-              vidId = liveJs.items[0].id && liveJs.items[0].id.videoId;
-              if (vidId) {
-                const detailURL = `https://www.googleapis.com/youtube/v3/videos?part=snippet,liveStreamingDetails&id=${vidId}&key=${apiKey}`;
-                const detailRes = await fetch(detailURL);
-                const detailJs = await detailRes.json();
-                const item = detailJs.items && detailJs.items[0];
-                if (item) {
-                  snippet = item.snippet || {};
-                  liveStreamingDetails = item.liveStreamingDetails || null;
-                }
-              }
-            }
-          } catch (e) {
-            console.error("Could not fetch LIVE video, will try latest.", e);
-          }
-
-          // Step 2: If no live video was found, fetch LATEST video
-          if (!vidId) {
-            try {
-              const latestURL = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&type=video&order=date&maxResults=1&key=${apiKey}`;
-              const latestRes = await fetch(latestURL);
-              if (!latestRes.ok)
-                throw new Error(`HTTP error! status: ${latestRes.status}`);
-              const latestJs = await latestRes.json();
-
-              if (Array.isArray(latestJs.items) && latestJs.items.length) {
-                status = "latest";
-                vidId = latestJs.items[0].id && latestJs.items[0].id.videoId;
-                snippet = latestJs.items[0].snippet || {};
-              } else {
-                console.warn("Channel has no videos.");
-                return;
-              }
-            } catch (e) {
-              console.error("Could not fetch LATEST video.", e);
-              return; // Stop if both fail
-            }
-          }
-
-          if (!vidId) return;
-
-          const thumb =
-            (snippet.thumbnails &&
-              snippet.thumbnails.high &&
-              snippet.thumbnails.high.url) ||
-            (snippet.thumbnails &&
-              snippet.thumbnails.medium &&
-              snippet.thumbnails.medium.url) ||
-            (snippet.thumbnails &&
-              snippet.thumbnails.default &&
-              snippet.thumbnails.default.url) ||
-            "";
-
-          renderYT({
-            status,
-            video: {
-              id: vidId,
-              title: snippet.title,
-              url: `https://www.youtube.com/watch?v=${vidId}`,
-              publishedAt: snippet.publishedAt,
-              liveDetails: liveStreamingDetails,
-              thumbnail: thumb,
-            },
-          });
-        }
-
-        const YT_JSONP_URL =
-          APPS_BASE +
-          "?service=yt&channelId=" +
-          encodeURIComponent(CHANNEL_ID) +
-          "&callback=renderYT";
-
-        const s = document.createElement("script");
-        s.src = YT_JSONP_URL;
-        s.onerror = () => {
-          fetchYouTubeDirect(CHANNEL_ID, YT_API_KEY);
-        };
-        document.body.appendChild(s);
-
-        setTimeout(() => {
-          if (!window.__ytJsonpOk) {
-            console.warn(
-              "JSONP YouTube tidak memanggil renderYT, pakai fallback API."
-            );
-            fetchYouTubeDirect(CHANNEL_ID, YT_API_KEY);
-          }
-        }, 12000);
-      });
-    </script>
+    <!-- App JS -->
+    <script src="js/app.js" defer></script>
   </body>
 </html>
