@@ -20,6 +20,7 @@
     --color-footer-text: #9ca3af;
   }
 }
+
 body {
   font-family: "Inter", sans-serif;
   background: var(--color-background);
@@ -75,7 +76,7 @@ body {
   transition: clip-path 0s;
 }
 
-/* Initial visibility */
+/* Initial visibility (akan di-fade-in oleh JS) */
 main,
 #header {
   opacity: 0;
@@ -227,4 +228,13 @@ body::before {
 [data-animate].is-visible {
   opacity: 1;
   transform: translateY(0);
+}
+
+/* Render skip untuk section jauh (percepat first paint) */
+#tentang,
+#warta,
+#galeri,
+#kontak {
+  content-visibility: auto;
+  contain-intrinsic-size: 1000px;
 }

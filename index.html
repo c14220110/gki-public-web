@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>GKI Kutisari Indah | Gereja Modern di Surabaya</title>
 
-    <!-- Tailwind CSS (CDN; aman dipakai dulu, warning bisa diabaikan) -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- GSAP -->
@@ -13,9 +13,6 @@
       src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"
       defer
     ></script>
-
-    <!-- Elfsight (Instagram) -->
-    <script src="https://elfsightcdn.com/platform.js" async></script>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -25,7 +22,13 @@
       rel="stylesheet"
     />
 
-    <!-- Styles (pindahan dari <style>) -->
+    <!-- Preconnect untuk konten eksternal -->
+    <link rel="preconnect" href="https://i.ytimg.com" crossorigin />
+    <link rel="preconnect" href="https://www.youtube.com" />
+    <!-- Elfsight akan diload malas, tapi preconnect boleh -->
+    <link rel="preconnect" href="https://elfsightcdn.com" crossorigin />
+
+    <!-- Styles -->
     <link rel="stylesheet" href="css/styles.css" />
   </head>
   <body class="antialiased">
@@ -50,12 +53,14 @@
     >
       <div class="container mx-auto px-6 py-3">
         <div class="flex items-center justify-between">
-          <a href="#" class="flex items-center space-x-3">
+          <a href="#beranda" class="flex items-center space-x-3">
             <img
               src="assets/logo.png"
               alt="Logo GKI Kutisari"
               class="h-12 w-auto"
               id="header-logo"
+              fetchpriority="high"
+              decoding="async"
             />
             <span
               class="brand-text text-xl font-bold hidden sm:inline"
@@ -85,6 +90,7 @@
             id="mobile-menu-button"
             class="md:hidden"
             style="color: var(--color-text-main)"
+            aria-label="Toggle menu"
           >
             <svg
               class="w-7 h-7"
@@ -127,7 +133,15 @@
         id="beranda"
         class="relative h-screen flex items-center justify-center text-white text-center overflow-hidden"
       >
-        <video id="heroVideo" autoplay muted loop playsinline>
+        <video
+          id="heroVideo"
+          autoplay
+          muted
+          loop
+          playsinline
+          preload="metadata"
+          poster="assets/bg_gki_poster.jpg"
+        >
           <source src="assets/bg_gki.mp4" type="video/mp4" />
           Browser Anda tidak mendukung tag video.
         </video>
@@ -271,6 +285,8 @@
                 src="assets/gedung_gereja.jpg"
                 alt="Gedung GKI Kutisari Indah"
                 class="rounded-2xl shadow-2xl w-full transform hover:scale-105 transition-transform duration-500"
+                loading="lazy"
+                decoding="async"
               />
             </div>
             <div data-animate style="transition-delay: 200ms" class="md:w-1/2">
@@ -303,6 +319,8 @@
                 alt="Pdt. William Suryajaya"
                 class="rounded-2xl shadow-2xl w-full max-w-md h-auto object-cover transform hover:scale-105 transition-transform duration-500"
                 style="max-height: 500px"
+                loading="lazy"
+                decoding="async"
               />
             </div>
             <div data-animate style="transition-delay: 200ms" class="md:w-1/2">
@@ -516,6 +534,7 @@
                 href="https://www.youtube.com/@gkikutisariindah"
                 target="_blank"
                 class="hover:text-white transition transform hover:scale-110"
+                aria-label="YouTube"
               >
                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                   <path
@@ -527,6 +546,7 @@
                 href="https://www.instagram.com/gkikutisariindah/"
                 target="_blank"
                 class="hover:text-white transition transform hover:scale-110"
+                aria-label="Instagram"
               >
                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                   <path
@@ -538,6 +558,7 @@
                 href="https://www.facebook.com/gkikutisariindah"
                 target="_blank"
                 class="hover:text-white transition transform hover:scale-110"
+                aria-label="Facebook"
               >
                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                   <path

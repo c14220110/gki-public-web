@@ -4,42 +4,6 @@ const APPS_URL =
 const CHANNEL_ID = "UCLDrtr-jxpA0h9WzmgUiKdQ";
 const YT_API_KEY = "AIzaSyDXjJ8hNVO9x4OD3VfPuofEpVKl9GXfzKM"; // opsional
 
-// --- Preloader + fade-in ---
-window.addEventListener("load", () => {
-  const preloader = document.getElementById("preloader");
-  const letters = document.querySelectorAll(".loader-text-line span");
-  const mainContent = document.querySelector("main");
-  const header = document.getElementById("header");
-
-  const tl = gsap.timeline({
-    onComplete: () => {
-      gsap.to(preloader, {
-        duration: 0.5,
-        opacity: 0,
-        onComplete: () => {
-          preloader.style.display = "none";
-        },
-      });
-      gsap.to([header, mainContent], { duration: 0.8, opacity: 1, delay: 0.2 });
-    },
-  });
-
-  tl.to(letters, { duration: 0.6, y: 0, stagger: 0.05, ease: "power2.out" })
-    .to(letters, {
-      "--clipPath": "inset(0% 0 0 0)",
-      duration: 0.8,
-      delay: 0.3,
-      ease: "power1.inOut",
-    })
-    .to(letters, {
-      duration: 0.6,
-      y: -110,
-      stagger: 0.05,
-      delay: 0.8,
-      ease: "power2.in",
-    });
-});
-
 // === GLOBALS ===
 let observer;
 window.__ytJsonpOk = false;
@@ -110,6 +74,8 @@ window.renderYT = function renderYT(data) {
   img.src = finalThumb;
   img.alt = v.title || "";
   img.className = "w-full h-56 object-cover";
+  img.loading = "lazy";
+  img.decoding = "async";
   imgWrapper.appendChild(img);
 
   const badgeSpan = document.createElement("span");
@@ -254,16 +220,14 @@ window.renderWarta = function renderWarta(data) {
     card.setAttribute("data-animate", "");
     card.style.transitionDelay = delay;
 
-    // cache-buster pada thumbnail
     const thumb = `${item.thumbnailUrl}&v=${Date.now()}`;
 
     card.innerHTML = `
-      <img src="${thumb}" alt="${
-      item.name || "Warta"
-    }" class="w-full h-56 object-cover" />
+      <img src="${thumb}" alt="${item.name || "Warta"}"
+           class="w-full h-56 object-cover" loading="lazy" decoding="async" />
       <div class="p-6">
         <span class="text-sm font-semibold" style="color: var(--color-text-accent)">PENGUMUMAN</span>
-        <h3 class="text-xl font-bold mt-2" style="color: var(--color-text-main)}">${
+        <h3 class="text-xl font-bold mt-2" style="color: var(--color-text-main}">${
           item.name || "Warta Jemaat"
         }</h3>
         <p class="mt-2" style="color: var(--color-text-secondary)">
@@ -272,12 +236,10 @@ window.renderWarta = function renderWarta(data) {
           }
         </p>
         <div class="mt-4 flex items-center gap-3">
-          <a href="${
-            item.downloadUrl
-          }" target="_blank" rel="noopener" class="inline-block font-semibold" style="color: var(--color-text-accent)">Unduh Warta →</a>
-          <a href="${
-            item.viewUrl
-          }" target="_blank" rel="noopener" class="inline-block text-sm underline opacity-80 hover:opacity-100" style="color: var(--color-text-secondary)">Lihat Pratinjau</a>
+          <a href="${item.downloadUrl}" target="_blank" rel="noopener"
+             class="inline-block font-semibold" style="color: var(--color-text-accent)">Unduh Warta →</a>
+          <a href="${item.viewUrl}" target="_blank" rel="noopener"
+             class="inline-block text-sm underline opacity-80 hover:opacity-100" style="color: var(--color-text-secondary)">Lihat Pratinjau</a>
         </div>
       </div>
     `;
@@ -294,18 +256,71 @@ window.renderWarta = function renderWarta(data) {
 
 // === DOM Ready ===
 document.addEventListener("DOMContentLoaded", () => {
+  // --- Preloader + fade-in --- (mulai di DOMContentLoaded agar cepat tampil)
+  const preloader = document.getElementById("preloader");
+  const letters = document.querySelectorAll(".loader-text-line span");
+  const mainContent = document.querySelector("main");
+  const header = document.getElementById("header");
+
+  const MIN_PRELOADER_MS = 800;
+  const t0 = performance.now();
+
+  if (window.gsap) {
+    const tl = gsap.timeline({
+      onComplete: () => {
+        const elapsed = performance.now() - t0;
+        const wait = Math.max(0, MIN_PRELOADER_MS - elapsed);
+        setTimeout(() => {
+          gsap.to(preloader, {
+            duration: 0.4,
+            opacity: 0,
+            onComplete: () => (preloader.style.display = "none"),
+          });
+          gsap.to([header, mainContent], {
+            duration: 0.6,
+            opacity: 1,
+            delay: 0.1,
+          });
+        }, wait);
+      },
+    });
+
+    tl.to(letters, { duration: 0.6, y: 0, stagger: 0.05, ease: "power2.out" })
+      .to(letters, {
+        "--clipPath": "inset(0% 0 0 0)",
+        duration: 0.8,
+        delay: 0.3,
+        ease: "power1.inOut",
+      })
+      .to(letters, {
+        duration: 0.6,
+        y: -110,
+        stagger: 0.05,
+        delay: 0.8,
+        ease: "power2.in",
+      });
+  } else {
+    // Fallback kalau GSAP gagal load
+    preloader.style.display = "none";
+    header.style.opacity = 1;
+    mainContent.style.opacity = 1;
+  }
+
   // Mobile menu
   const mobileMenuButton = document.getElementById("mobile-menu-button");
   const mobileMenu = document.getElementById("mobile-menu");
-  mobileMenuButton.addEventListener("click", () =>
-    mobileMenu.classList.toggle("hidden")
-  );
-  document.querySelectorAll("#mobile-menu a").forEach((link) => {
-    link.addEventListener("click", () => mobileMenu.classList.add("hidden"));
-  });
+  if (mobileMenuButton && mobileMenu) {
+    mobileMenuButton.addEventListener("click", () =>
+      mobileMenu.classList.toggle("hidden")
+    );
+    document.querySelectorAll("#mobile-menu a").forEach((link) => {
+      link.addEventListener("click", () => mobileMenu.classList.add("hidden"));
+    });
+  }
 
   // Footer year
-  document.getElementById("year").textContent = new Date().getFullYear();
+  const yearEl = document.getElementById("year");
+  if (yearEl) yearEl.textContent = new Date().getFullYear();
 
   // Scroll reveal
   observer = new IntersectionObserver(
@@ -328,7 +343,6 @@ document.addEventListener("DOMContentLoaded", () => {
     .forEach((el) => observer.observe(el));
 
   // Header shadow on scroll
-  const header = document.getElementById("header");
   window.addEventListener("scroll", () => {
     if (window.scrollY > 10) header.classList.add("shadow-lg");
     else header.classList.remove("shadow-lg");
@@ -352,4 +366,26 @@ document.addEventListener("DOMContentLoaded", () => {
   setTimeout(() => {
     if (!window.__ytJsonpOk) fetchYouTubeDirect(CHANNEL_ID, YT_API_KEY);
   }, 12000);
+
+  // === Lazy-load Elfsight saat #galeri mendekati viewport ===
+  const galeri = document.getElementById("galeri");
+  let elfsightLoaded = false;
+  if (galeri) {
+    const obs = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting && !elfsightLoaded) {
+            elfsightLoaded = true;
+            const s = document.createElement("script");
+            s.src = "https://elfsightcdn.com/platform.js";
+            s.async = true;
+            document.head.appendChild(s);
+            obs.disconnect();
+          }
+        });
+      },
+      { rootMargin: "800px" }
+    );
+    obs.observe(galeri);
+  }
 });
