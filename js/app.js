@@ -323,19 +323,37 @@ document.addEventListener("DOMContentLoaded", () => {
   const yearEl = document.getElementById("year");
   if (yearEl) yearEl.textContent = new Date().getFullYear();
   // === Load Dynamic Website Content ===
+  // === Load Dynamic Website Content ===
   async function loadDynamicContent() {
     try {
+      console.log("🔄 Loading dynamic content from:", MANAGEMENT_API);
+
       const response = await fetch(MANAGEMENT_API);
+      console.log("📡 Response status:", response.status);
+
       if (!response.ok) throw new Error("Failed to load content");
 
       const data = await response.json();
+      console.log("✅ Data loaded:", data);
 
       // Update Hero Section
       if (data.hero) {
-        const heroTitle = document.querySelector("#beranda h1");
-        const heroSubtitle = document.querySelector("#beranda h1 + p");
-        if (heroTitle) heroTitle.textContent = data.hero.title;
-        if (heroSubtitle) heroSubtitle.textContent = data.hero.subtitle;
+        const heroTitle = document.querySelector("#beranda .hero-content h1");
+        const heroSubtitle = document.querySelector("#beranda .hero-content p");
+
+        console.log("🎯 Found hero elements:", {
+          titleFound: !!heroTitle,
+          subtitleFound: !!heroSubtitle,
+        });
+
+        if (heroTitle) {
+          heroTitle.textContent = data.hero.title;
+          console.log("✏️ Updated hero title to:", data.hero.title);
+        }
+        if (heroSubtitle) {
+          heroSubtitle.textContent = data.hero.subtitle;
+          console.log("✏️ Updated hero subtitle to:", data.hero.subtitle);
+        }
       }
 
       // Update Schedules Section
@@ -344,12 +362,15 @@ document.addEventListener("DOMContentLoaded", () => {
         const scheduleSubtitle = document.querySelector(
           "#jadwal .section-subtitle"
         );
+
         if (scheduleTitle) scheduleTitle.textContent = data.schedules.title;
         if (scheduleSubtitle)
           scheduleSubtitle.textContent = data.schedules.subtitle;
 
         // Render schedule cards
         const scheduleGrid = document.querySelector("#jadwal .mt-16.grid");
+        console.log("📅 Schedule grid found:", !!scheduleGrid);
+
         if (
           scheduleGrid &&
           data.schedules.items &&
@@ -357,6 +378,7 @@ document.addEventListener("DOMContentLoaded", () => {
         ) {
           // Clear existing hardcoded cards
           const existingCards = scheduleGrid.querySelectorAll(".glass-card");
+          console.log("🗑️ Removing", existingCards.length, "existing cards");
           existingCards.forEach((card) => card.remove());
 
           // Render dynamic cards
@@ -371,6 +393,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 : index === 4
                 ? "800ms"
                 : "0ms";
+
             const card = document.createElement("div");
             card.setAttribute("data-animate", "");
             card.style.transitionDelay = delay;
@@ -385,12 +408,21 @@ document.addEventListener("DOMContentLoaded", () => {
             // Observe for animation
             if (observer) observer.observe(card);
           });
+
+          console.log(
+            "✅ Rendered",
+            data.schedules.items.length,
+            "schedule cards"
+          );
         }
       }
     } catch (error) {
-      console.warn("Could not load dynamic content, using defaults:", error);
+      console.warn("⚠️ Could not load dynamic content:", error);
     }
   }
+
+  // Load dynamic content
+  loadDynamicContent();
 
   // Load dynamic content
   loadDynamicContent();
