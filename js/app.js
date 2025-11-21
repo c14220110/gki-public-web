@@ -380,7 +380,8 @@ document.addEventListener("DOMContentLoaded", () => {
           scheduleSubtitle.textContent = data.schedules.subtitle;
 
         // Render schedule cards
-        const scheduleGrid = document.querySelector("#jadwal .mt-16.grid");
+        // Render schedule cards
+        const scheduleGrid = document.getElementById("schedule-grid");
         console.log("📅 Schedule grid found:", !!scheduleGrid);
 
         if (
@@ -409,7 +410,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const card = document.createElement("div");
             card.setAttribute("data-animate", "");
             card.style.transitionDelay = delay;
-            card.className = "glass-card p-8";
+            card.className = "glass-card p-8 w-full max-w-md";
             card.innerHTML = `
               <h3 class="text-2xl font-bold mb-2" style="color: var(--color-text-main)">${item.name}</h3>
               <p class="font-semibold text-lg" style="color: var(--color-text-secondary)">${item.time}</p>
