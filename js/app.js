@@ -3,6 +3,7 @@ const APPS_URL =
   "https://script.google.com/macros/s/AKfycbwy43M6LfmKXBXOQuaLq1MvpjG1-0w2mAirMh3ipoYQeUEvXGp08YseKGmgKfnd80SQ6Q/exec";
 const CHANNEL_ID = "UCLDrtr-jxpA0h9WzmgUiKdQ";
 const YT_API_KEY = "AIzaSyDXjJ8hNVO9x4OD3VfPuofEpVKl9GXfzKM"; // opsional
+const MANAGEMENT_API = "https://gki-management.vercel.app/api/website-content";
 
 // === GLOBALS ===
 let observer;
@@ -321,6 +322,78 @@ document.addEventListener("DOMContentLoaded", () => {
   // Footer year
   const yearEl = document.getElementById("year");
   if (yearEl) yearEl.textContent = new Date().getFullYear();
+  // === Load Dynamic Website Content ===
+  async function loadDynamicContent() {
+    try {
+      const response = await fetch(MANAGEMENT_API);
+      if (!response.ok) throw new Error("Failed to load content");
+
+      const data = await response.json();
+
+      // Update Hero Section
+      if (data.hero) {
+        const heroTitle = document.querySelector("#beranda h1");
+        const heroSubtitle = document.querySelector("#beranda h1 + p");
+        if (heroTitle) heroTitle.textContent = data.hero.title;
+        if (heroSubtitle) heroSubtitle.textContent = data.hero.subtitle;
+      }
+
+      // Update Schedules Section
+      if (data.schedules) {
+        const scheduleTitle = document.querySelector("#jadwal .section-title");
+        const scheduleSubtitle = document.querySelector(
+          "#jadwal .section-subtitle"
+        );
+        if (scheduleTitle) scheduleTitle.textContent = data.schedules.title;
+        if (scheduleSubtitle)
+          scheduleSubtitle.textContent = data.schedules.subtitle;
+
+        // Render schedule cards
+        const scheduleGrid = document.querySelector("#jadwal .mt-16.grid");
+        if (
+          scheduleGrid &&
+          data.schedules.items &&
+          data.schedules.items.length > 0
+        ) {
+          // Clear existing hardcoded cards
+          const existingCards = scheduleGrid.querySelectorAll(".glass-card");
+          existingCards.forEach((card) => card.remove());
+
+          // Render dynamic cards
+          data.schedules.items.forEach((item, index) => {
+            const delay =
+              index === 1
+                ? "200ms"
+                : index === 2
+                ? "400ms"
+                : index === 3
+                ? "600ms"
+                : index === 4
+                ? "800ms"
+                : "0ms";
+            const card = document.createElement("div");
+            card.setAttribute("data-animate", "");
+            card.style.transitionDelay = delay;
+            card.className = "glass-card p-8";
+            card.innerHTML = `
+              <h3 class="text-2xl font-bold mb-2" style="color: var(--color-text-main)">${item.name}</h3>
+              <p class="font-semibold text-lg" style="color: var(--color-text-secondary)">${item.time}</p>
+              <p class="mt-4" style="color: var(--color-text-secondary)">${item.description}</p>
+            `;
+            scheduleGrid.appendChild(card);
+
+            // Observe for animation
+            if (observer) observer.observe(card);
+          });
+        }
+      }
+    } catch (error) {
+      console.warn("Could not load dynamic content, using defaults:", error);
+    }
+  }
+
+  // Load dynamic content
+  loadDynamicContent();
 
   // Scroll reveal
   observer = new IntersectionObserver(
