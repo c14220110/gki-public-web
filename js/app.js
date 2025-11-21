@@ -340,10 +340,12 @@ document.addEventListener("DOMContentLoaded", () => {
       if (data.hero) {
         const heroTitle = document.querySelector("#beranda .hero-content h1");
         const heroSubtitle = document.querySelector("#beranda .hero-content p");
+        const heroVideo = document.getElementById("heroVideo");
 
         console.log("🎯 Found hero elements:", {
           titleFound: !!heroTitle,
           subtitleFound: !!heroSubtitle,
+          videoFound: !!heroVideo,
         });
 
         if (heroTitle) {
@@ -353,6 +355,16 @@ document.addEventListener("DOMContentLoaded", () => {
         if (heroSubtitle) {
           heroSubtitle.textContent = data.hero.subtitle;
           console.log("✏️ Updated hero subtitle to:", data.hero.subtitle);
+        }
+
+        // 🔥 ganti source video kalau API kirim videoUrl
+        if (heroVideo && data.hero.videoUrl) {
+          const sourceEl = heroVideo.querySelector("source");
+          if (sourceEl) {
+            sourceEl.src = data.hero.videoUrl;
+            heroVideo.load();
+            console.log("🎬 Updated hero video src to:", data.hero.videoUrl);
+          }
         }
       }
 
