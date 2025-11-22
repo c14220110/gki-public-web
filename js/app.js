@@ -69,6 +69,10 @@ window.renderYT = function renderYT(data) {
     "glass-card overflow-hidden p-0 youtube-spotlight-card text-left md:max-w-2xl w-full";
   card.setAttribute("data-animate", "");
 
+  // 🔥 Supaya muncul setelah semua jadwal (0,200,400,600,800 ms)
+  // jadikan YouTube card paling akhir (misalnya 1000 ms)
+  card.style.transitionDelay = "1000ms";
+
   const imgWrapper = document.createElement("div");
   imgWrapper.className = "relative";
   const img = document.createElement("img");
