@@ -368,7 +368,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
 
-      // Update Schedules Section
       // Update "Tentang Kami" Section
       if (data.about) {
         const about = data.about;
@@ -380,28 +379,38 @@ document.addEventListener("DOMContentLoaded", () => {
         const aboutBtn = document.getElementById("about-button");
         const aboutImg = document.getElementById("about-image");
 
-        if (aboutTagline && about.taglineLabel) {
-          aboutTagline.textContent = about.taglineLabel;
+        // dukung 2 versi struktur: lama (badge/heading/ctaText/ctaUrl)
+        // dan baru (taglineLabel/title/buttonLabel/buttonHref)
+        const badge = about.taglineLabel || about.badge;
+        const title = about.title || about.heading;
+        const paragraph1 = about.paragraph1;
+        const paragraph2 = about.paragraph2;
+        const buttonLabel = about.buttonLabel || about.ctaText;
+        const buttonHref = about.buttonHref || about.ctaUrl;
+        const imageUrl = about.imageUrl;
+
+        if (aboutTagline && badge) {
+          aboutTagline.textContent = badge;
         }
-        if (aboutTitle && about.title) {
-          aboutTitle.textContent = about.title;
+        if (aboutTitle && title) {
+          aboutTitle.textContent = title;
         }
-        if (aboutP1 && about.paragraph1) {
-          aboutP1.textContent = about.paragraph1;
+        if (aboutP1 && paragraph1) {
+          aboutP1.textContent = paragraph1;
         }
-        if (aboutP2 && about.paragraph2) {
-          aboutP2.textContent = about.paragraph2;
+        if (aboutP2 && paragraph2) {
+          aboutP2.textContent = paragraph2;
         }
         if (aboutBtn) {
-          if (about.buttonLabel) {
-            aboutBtn.textContent = about.buttonLabel;
+          if (buttonLabel) {
+            aboutBtn.textContent = buttonLabel;
           }
-          if (about.buttonHref) {
-            aboutBtn.href = about.buttonHref;
+          if (buttonHref) {
+            aboutBtn.href = buttonHref;
           }
         }
-        if (aboutImg && about.imageUrl) {
-          aboutImg.src = about.imageUrl;
+        if (aboutImg && imageUrl) {
+          aboutImg.src = imageUrl;
         }
       }
 
@@ -416,33 +425,44 @@ document.addEventListener("DOMContentLoaded", () => {
         const pastorBtn = document.getElementById("pastor-button");
         const pastorImg = document.getElementById("pastor-image");
 
-        if (pastorTagline && p.taglineLabel) {
-          pastorTagline.textContent = p.taglineLabel;
+        const badge = p.taglineLabel || p.badge;
+        const name = p.name;
+        const description = p.description;
+        const buttonLabel = p.buttonLabel || p.buttonText;
+        const buttonHref = p.buttonHref || p.buttonUrl;
+        const imageUrl = p.imageUrl;
+        const phoneDisplay = p.phoneDisplay || p.phone;
+        const phoneHref =
+          p.phoneHref ||
+          (phoneDisplay ? `tel:${phoneDisplay.replace(/[^0-9+]/g, "")}` : null);
+
+        if (pastorTagline && badge) {
+          pastorTagline.textContent = badge;
         }
-        if (pastorName && p.name) {
-          pastorName.textContent = p.name;
+        if (pastorName && name) {
+          pastorName.textContent = name;
         }
         if (pastorPhone) {
-          if (p.phoneDisplay) {
-            pastorPhone.textContent = p.phoneDisplay;
+          if (phoneDisplay) {
+            pastorPhone.textContent = phoneDisplay;
           }
-          if (p.phoneHref) {
-            pastorPhone.href = p.phoneHref;
+          if (phoneHref) {
+            pastorPhone.href = phoneHref;
           }
         }
-        if (pastorDesc && p.description) {
-          pastorDesc.textContent = p.description;
+        if (pastorDesc && description) {
+          pastorDesc.textContent = description;
         }
         if (pastorBtn) {
-          if (p.buttonLabel) {
-            pastorBtn.textContent = p.buttonLabel;
+          if (buttonLabel) {
+            pastorBtn.textContent = buttonLabel;
           }
-          if (p.buttonHref) {
-            pastorBtn.href = p.buttonHref;
+          if (buttonHref) {
+            pastorBtn.href = buttonHref;
           }
         }
-        if (pastorImg && p.imageUrl) {
-          pastorImg.src = p.imageUrl;
+        if (pastorImg && imageUrl) {
+          pastorImg.src = imageUrl;
         }
       }
 
