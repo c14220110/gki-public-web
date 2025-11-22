@@ -369,6 +369,83 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       // Update Schedules Section
+      // Update "Tentang Kami" Section
+      if (data.about) {
+        const about = data.about;
+
+        const aboutTagline = document.getElementById("about-tagline");
+        const aboutTitle = document.getElementById("about-title");
+        const aboutP1 = document.getElementById("about-paragraph-1");
+        const aboutP2 = document.getElementById("about-paragraph-2");
+        const aboutBtn = document.getElementById("about-button");
+        const aboutImg = document.getElementById("about-image");
+
+        if (aboutTagline && about.taglineLabel) {
+          aboutTagline.textContent = about.taglineLabel;
+        }
+        if (aboutTitle && about.title) {
+          aboutTitle.textContent = about.title;
+        }
+        if (aboutP1 && about.paragraph1) {
+          aboutP1.textContent = about.paragraph1;
+        }
+        if (aboutP2 && about.paragraph2) {
+          aboutP2.textContent = about.paragraph2;
+        }
+        if (aboutBtn) {
+          if (about.buttonLabel) {
+            aboutBtn.textContent = about.buttonLabel;
+          }
+          if (about.buttonHref) {
+            aboutBtn.href = about.buttonHref;
+          }
+        }
+        if (aboutImg && about.imageUrl) {
+          aboutImg.src = about.imageUrl;
+        }
+      }
+
+      // Update "Profil Gembala Sidang" Section
+      if (data.pastor) {
+        const p = data.pastor;
+
+        const pastorTagline = document.getElementById("pastor-tagline");
+        const pastorName = document.getElementById("pastor-name");
+        const pastorPhone = document.getElementById("pastor-phone");
+        const pastorDesc = document.getElementById("pastor-description");
+        const pastorBtn = document.getElementById("pastor-button");
+        const pastorImg = document.getElementById("pastor-image");
+
+        if (pastorTagline && p.taglineLabel) {
+          pastorTagline.textContent = p.taglineLabel;
+        }
+        if (pastorName && p.name) {
+          pastorName.textContent = p.name;
+        }
+        if (pastorPhone) {
+          if (p.phoneDisplay) {
+            pastorPhone.textContent = p.phoneDisplay;
+          }
+          if (p.phoneHref) {
+            pastorPhone.href = p.phoneHref;
+          }
+        }
+        if (pastorDesc && p.description) {
+          pastorDesc.textContent = p.description;
+        }
+        if (pastorBtn) {
+          if (p.buttonLabel) {
+            pastorBtn.textContent = p.buttonLabel;
+          }
+          if (p.buttonHref) {
+            pastorBtn.href = p.buttonHref;
+          }
+        }
+        if (pastorImg && p.imageUrl) {
+          pastorImg.src = p.imageUrl;
+        }
+      }
+
       if (data.schedules) {
         const scheduleTitle = document.querySelector("#jadwal .section-title");
         const scheduleSubtitle = document.querySelector(
