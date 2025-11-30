@@ -375,98 +375,131 @@ document.addEventListener("DOMContentLoaded", () => {
       // Update "Tentang Kami" Section
       if (data.about) {
         const about = data.about;
-
         const aboutTagline = document.getElementById("about-tagline");
         const aboutTitle = document.getElementById("about-title");
         const aboutP1 = document.getElementById("about-paragraph-1");
         const aboutP2 = document.getElementById("about-paragraph-2");
-        const aboutBtn = document.getElementById("about-button");
-        const aboutImg = document.getElementById("about-image");
+        const aboutImage = document.getElementById("about-image");
+        const aboutButton = document.getElementById("about-button");
 
-        // dukung 2 versi struktur: lama (badge/heading/ctaText/ctaUrl)
-        // dan baru (taglineLabel/title/buttonLabel/buttonHref)
-        const badge = about.taglineLabel || about.badge;
-        const title = about.title || about.heading;
-        const paragraph1 = about.paragraph1;
-        const paragraph2 = about.paragraph2;
-        const buttonLabel = about.buttonLabel || about.ctaText;
-        const buttonHref = about.buttonHref || about.ctaUrl;
-        const imageUrl = about.imageUrl;
+        if (aboutTagline) {
+          aboutTagline.textContent = about.badge || "TENTANG KAMI";
+        }
+        if (aboutTitle) {
+          aboutTitle.textContent =
+            about.heading || "Mengenal GKI Kutisari Indah";
+        }
+        if (aboutP1) {
+          aboutP1.textContent =
+            about.paragraph1 ||
+            "Komunitas yang bertumbuh dalam pengenalan akan Kristus, saling mengasihi, dan melayani.";
+        }
+        if (aboutP2) {
+          aboutP2.textContent =
+            about.paragraph2 ||
+            "Visi kami: gereja yang relevan, berdampak, dan menjadi berkat.";
+        }
+        if (aboutImage && about.imageUrl) {
+          aboutImage.src = about.imageUrl;
+        }
 
-        if (aboutTagline && badge) {
-          aboutTagline.textContent = badge;
-        }
-        if (aboutTitle && title) {
-          aboutTitle.textContent = title;
-        }
-        if (aboutP1 && paragraph1) {
-          aboutP1.textContent = paragraph1;
-        }
-        if (aboutP2 && paragraph2) {
-          aboutP2.textContent = paragraph2;
-        }
-        if (aboutBtn) {
-          if (buttonLabel) {
-            aboutBtn.textContent = buttonLabel;
+        // 🔥 Ini yang tadi belum: text + href tombol ikut dari database
+        if (aboutButton) {
+          if (about.ctaText) {
+            aboutButton.textContent = about.ctaText;
           }
-          if (buttonHref) {
-            aboutBtn.href = buttonHref;
+          if (about.ctaUrl) {
+            aboutButton.href = about.ctaUrl;
           }
-        }
-        if (aboutImg && imageUrl) {
-          aboutImg.src = imageUrl;
         }
       }
 
       // Update "Profil Gembala Sidang" Section
+      // Update "Profil Gembala Sidang" Section
       if (data.pastor) {
-        const p = data.pastor;
+        const pastor = data.pastor;
 
         const pastorTagline = document.getElementById("pastor-tagline");
         const pastorName = document.getElementById("pastor-name");
         const pastorPhone = document.getElementById("pastor-phone");
-        const pastorDesc = document.getElementById("pastor-description");
-        const pastorBtn = document.getElementById("pastor-button");
-        const pastorImg = document.getElementById("pastor-image");
+        const pastorDescription = document.getElementById("pastor-description");
+        const pastorImage = document.getElementById("pastor-image");
+        const pastorButton = document.getElementById("pastor-button");
 
-        const badge = p.taglineLabel || p.badge;
-        const name = p.name;
-        const description = p.description;
-        const buttonLabel = p.buttonLabel || p.buttonText;
-        const buttonHref = p.buttonHref || p.buttonUrl;
-        const imageUrl = p.imageUrl;
-        const phoneDisplay = p.phoneDisplay || p.phone;
-        const phoneHref =
-          p.phoneHref ||
-          (phoneDisplay ? `tel:${phoneDisplay.replace(/[^0-9+]/g, "")}` : null);
-
-        if (pastorTagline && badge) {
-          pastorTagline.textContent = badge;
+        if (pastorTagline) {
+          pastorTagline.textContent = pastor.badge || "PROFIL GEMBALA SIDANG";
         }
-        if (pastorName && name) {
-          pastorName.textContent = name;
+        if (pastorName) {
+          pastorName.textContent = pastor.name || "Pdt. William Suryajaya";
         }
         if (pastorPhone) {
-          if (phoneDisplay) {
-            pastorPhone.textContent = phoneDisplay;
+          const phoneNumber = pastor.phone || "087808786969";
+          pastorPhone.textContent = phoneNumber;
+          pastorPhone.href = `tel:${phoneNumber}`;
+        }
+        if (pastorDescription) {
+          pastorDescription.textContent =
+            pastor.description ||
+            "Gembala sidang yang memimpin dengan dedikasi dan kasih, membimbing jemaat dalam pertumbuhan rohani.";
+        }
+        if (pastorImage && pastor.imageUrl) {
+          pastorImage.src = pastor.imageUrl;
+        }
+        if (pastorButton) {
+          if (pastor.buttonText) {
+            pastorButton.textContent = pastor.buttonText;
           }
-          if (phoneHref) {
-            pastorPhone.href = phoneHref;
+          if (pastor.buttonUrl) {
+            pastorButton.href = pastor.buttonUrl;
           }
         }
-        if (pastorDesc && description) {
-          pastorDesc.textContent = description;
+      }
+
+      // Update "Kontak" Section
+      if (data.contact) {
+        const contact = data.contact;
+
+        const contactTitle = document.getElementById("contact-title");
+        const contactSubtitle = document.getElementById("contact-subtitle");
+        const addrTitle = document.getElementById("contact-address-title");
+        const addrText = document.getElementById("contact-address-text");
+        const officeTitle = document.getElementById("contact-office-title");
+        const officeText = document.getElementById("contact-office-text");
+        const waLink = document.getElementById("contact-whatsapp-link");
+        const waLabel = document.getElementById("contact-whatsapp-label");
+
+        if (contactTitle) {
+          contactTitle.textContent =
+            contact.sectionTitle || "Hubungi & Kunjungi Kami";
         }
-        if (pastorBtn) {
-          if (buttonLabel) {
-            pastorBtn.textContent = buttonLabel;
-          }
-          if (buttonHref) {
-            pastorBtn.href = buttonHref;
-          }
+        if (contactSubtitle) {
+          contactSubtitle.textContent =
+            contact.sectionSubtitle ||
+            "Kami senang dapat terhubung dengan Anda.";
         }
-        if (pastorImg && imageUrl) {
-          pastorImg.src = imageUrl;
+        if (addrTitle) {
+          addrTitle.textContent = contact.addressTitle || "Alamat Gereja";
+        }
+        if (addrText) {
+          addrText.textContent =
+            contact.addressText ||
+            "Jl. Raya Kutisari Indah No.139, Kutisari, Kec. Tenggilis Mejoyo, Surabaya, Jawa Timur 60291";
+        }
+        if (officeTitle) {
+          officeTitle.textContent = contact.officeTitle || "Kantor Gereja";
+        }
+        if (officeText) {
+          officeText.textContent =
+            contact.officeText ||
+            "Hubungi kami untuk informasi umum & administrasi.";
+        }
+        if (waLabel) {
+          waLabel.textContent =
+            contact.officeWhatsappLabel || "WhatsApp Kantor";
+        }
+        if (waLink) {
+          waLink.href =
+            contact.officeWhatsappUrl || "https://wa.me/6281332240711";
         }
       }
 
