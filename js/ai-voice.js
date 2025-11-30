@@ -321,7 +321,7 @@ async function startSession() {
         systemInstruction,
         speechConfig: {
           voiceConfig: {
-            prebuiltVoiceConfig: { voiceName: "Vindemiatrix" },
+            prebuiltVoiceConfig: { voiceName: "Charon" },
           },
         },
       },
