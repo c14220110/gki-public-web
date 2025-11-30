@@ -339,6 +339,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const data = await response.json();
       console.log("✅ Data loaded:", data);
+      // 👉 Simpan global supaya bisa dipakai oleh AI Voice Agent
+      window.__gkiContent = data;
 
       // Update Hero Section
       if (data.hero) {

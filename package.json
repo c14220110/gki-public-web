@@ -1,0 +1,23 @@
+{
+  "name": "gki-public-web-main",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/c14220110/gki-public-web.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/c14220110/gki-public-web/issues"
+  },
+  "homepage": "https://github.com/c14220110/gki-public-web#readme",
+  "description": "",
+  "dependencies": {
+    "@google/genai": "^1.30.0"
+  }
+}
