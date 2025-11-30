@@ -285,7 +285,7 @@ async function startSession() {
 
     // 5. Buka sesi realtime
     sessionPromise = aiClient.live.connect({
-      model: "gemini-2.5-flash-native-audio-preview",
+      model: "gemini-2.5-flash-native-audio-preview-09-2025",
       config: {
         responseModalities: [Modality.AUDIO],
         systemInstruction,
