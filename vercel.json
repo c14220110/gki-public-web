@@ -3,8 +3,5 @@
     "api/**/*.js": {
       "includeFiles": "node_modules/@google/genai/**"
     }
-  },
-  "engines": {
-    "node": "20.x"
   }
 }
