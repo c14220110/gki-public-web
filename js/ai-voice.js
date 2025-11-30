@@ -262,7 +262,7 @@ async function startSession() {
 
   try {
     // 1. PAKAI API KEY LANGSUNG (UNTUK TEST)
-    const apiKey = "ISI_API_KEY_GEMINI_DI_SINI"; // ⚠️ sementara saja, jangan di-commit ke publik
+    const apiKey = "AIzaSyDk8QmDi4Dhe69EbRQ-qI_qrmFFGHaihUY"; // ⚠️ sementara saja, jangan di-commit ke publik
     if (!apiKey) {
       throw new Error("API key Gemini belum di-set");
     }
