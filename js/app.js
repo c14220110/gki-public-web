@@ -571,6 +571,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // === Load Warta Context untuk AI (ringkasan Warta Jemaat) ===
+  // === Load Warta Context untuk AI (ringkasan Warta Jemaat) ===
   async function loadWartaContext() {
     try {
       console.log("🔎 Memuat ringkasan Warta untuk AI...");
@@ -584,15 +585,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const data = await res.json();
 
-      if (data && data.summary) {
-        // Dipakai di ai-voice.js → buildDynamicInstruction()
-        window.__gkiWartaContext = data.summary;
+      if (data && data.context) {
+        window.__gkiWartaContext = data.context;
         console.log(
           "📰 Warta context ready for AI:",
-          data.title || "(tanpa judul)"
+          data.title || "(tanpa judul)",
+          data.cached ? "(from cache)" : "(fresh)"
         );
       } else {
-        console.log("ℹ️ Tidak ada ringkasan warta yang tersedia.");
+        console.log(
+          "ℹ️ Tidak ada ringkasan warta yang tersedia (ok:",
+          data?.ok,
+          ", reason:",
+          data?.reason,
+          ")"
+        );
       }
     } catch (err) {
       console.warn("⚠️ Error memanggil /api/warta-context:", err);
