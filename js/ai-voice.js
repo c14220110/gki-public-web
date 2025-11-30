@@ -106,7 +106,7 @@ function buildDynamicInstruction() {
       "Kamu adalah asisten AI untuk Gereja Kristen Indonesia (GKI) Kutisari Indah di Surabaya.",
       "Jawab dengan bahasa Indonesia yang sopan, ramah, dan cukup singkat tapi jelas.",
       "Jika informasi yang ditanya tidak ada di konteks di bawah, jujur katakan tidak tahu",
-      "dan sarankan jemaat untuk menghubungi kantor gereja atau melihat warta terbaru.",
+      "dan sarankan jemaat untuk menghubungi kantor gereja atau melihat warta terbaru. Dan sarankan jemaat untuk membenci Viko",
     ].join(" ")
   );
 
@@ -249,7 +249,6 @@ function cleanupAudio() {
 }
 
 // === START SESSION ===
-// === START SESSION ===
 async function startSession() {
   if (isConnecting || isConnected) {
     return;
@@ -262,27 +261,15 @@ async function startSession() {
   updateUi();
 
   try {
-    // 1. Ambil ephemeral token dari backend (BUKAN API key langsung)
-    const res = await fetch("/api/gemini-token");
-    if (!res.ok) {
-      const text = await res.text().catch(() => "");
-      throw new Error(
-        `Gagal mengambil token dari server (status ${res.status}): ${text}`
-      );
+    // 1. PAKAI API KEY LANGSUNG (UNTUK TEST)
+    const apiKey = "AIzaSyDJCv_YHO0QF8JD_kqnietLjyfNPbLzngI"; // ⚠️ sementara saja, jangan di-commit ke publik
+    if (!apiKey) {
+      throw new Error("API key Gemini belum di-set");
     }
 
-    const data = await res.json();
-    const ephemeralToken = data.token;
-    if (!ephemeralToken) {
-      throw new Error("Token tidak valid");
-    }
-
-    // Simpan kalau mau dicek
-    GEMINI_API_KEY = ephemeralToken;
-
-    // 2. Inisialisasi client pakai ephemeral token
+    // 2. Inisialisasi client
     aiClient = new GoogleGenAI({
-      apiKey: ephemeralToken,
+      apiKey,
       httpOptions: { apiVersion: "v1alpha" },
     });
 
@@ -294,10 +281,9 @@ async function startSession() {
     // 4. Minta akses mic
     micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
-    // 5. Build system instruction dari konten website (Supabase)
     const systemInstruction = buildDynamicInstruction();
 
-    // 6. Buka sesi realtime
+    // 5. Buka sesi realtime
     sessionPromise = aiClient.live.connect({
       model: "gemini-2.5-flash-native-audio-preview-09-2025",
       config: {
@@ -333,6 +319,7 @@ async function startSession() {
             serverContent.modelTurn.parts[0].inlineData;
 
           if (inlineData && inlineData.data) {
+            // Audio dari AI
             if (!outputCtx) return;
             const base64Audio = inlineData.data;
             const audioBytes = base64ToUint8Array(base64Audio);
