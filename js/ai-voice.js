@@ -262,7 +262,7 @@ async function startSession() {
 
   try {
     // 1. PAKAI API KEY LANGSUNG (UNTUK TEST)
-    const apiKey = "AIzaSyDk8QmDi4Dhe69EbRQ-qI_qrmFFGHaihUY"; // ⚠️ sementara saja, jangan di-commit ke publik
+    const apiKey = "AIzaSyAqxpaHBJQjyTC9X72ed6of3k33MObfPy0"; // ⚠️ sementara saja, jangan di-commit ke publik
     if (!apiKey) {
       throw new Error("API key Gemini belum di-set");
     }
@@ -285,7 +285,7 @@ async function startSession() {
 
     // 5. Buka sesi realtime
     sessionPromise = aiClient.live.connect({
-      model: "gemini-2.0-flash-exp",
+      model: "gemini-2.5-flash-native-audio-preview",
       config: {
         responseModalities: [Modality.AUDIO],
         systemInstruction,
