@@ -570,11 +570,39 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Load dynamic content
-  loadDynamicContent();
+  // === Load Warta Context untuk AI (ringkasan Warta Jemaat) ===
+  async function loadWartaContext() {
+    try {
+      console.log("🔎 Memuat ringkasan Warta untuk AI...");
+
+      const res = await fetch("/api/warta-context");
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        console.warn("⚠️ Gagal memuat /api/warta-context:", res.status, text);
+        return;
+      }
+
+      const data = await res.json();
+
+      if (data && data.summary) {
+        // Dipakai di ai-voice.js → buildDynamicInstruction()
+        window.__gkiWartaContext = data.summary;
+        console.log(
+          "📰 Warta context ready for AI:",
+          data.title || "(tanpa judul)"
+        );
+      } else {
+        console.log("ℹ️ Tidak ada ringkasan warta yang tersedia.");
+      }
+    } catch (err) {
+      console.warn("⚠️ Error memanggil /api/warta-context:", err);
+    }
+  }
 
   // Load dynamic content
   loadDynamicContent();
+
+  loadWartaContext();
 
   // Scroll reveal
   observer = new IntersectionObserver(
