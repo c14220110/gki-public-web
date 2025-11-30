@@ -347,7 +347,7 @@ async function startSession() {
         },
         onerror: (err) => {
           console.error("Session error", err);
-          setError("Terputus. Silakan coba lagi.");
+          setError("Error sesi: " + (err?.message || String(err)));
           cleanupAudio();
         },
       },
@@ -356,7 +356,7 @@ async function startSession() {
     console.error(err);
     isConnecting = false;
     isConnected = false;
-    setError("Gagal menghubungkan ke AI.");
+    setError("Gagal menghubungkan ke AI: " + (err?.message || String(err)));
   }
 }
 

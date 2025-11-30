@@ -27,14 +27,6 @@ export default async function handler(req, res) {
         expireTime,
         liveConnectConstraints: {
           model: "gemini-2.5-flash-native-audio-preview-09-2025",
-          config: {
-            sessionResumption: {},
-            temperature: 0.7,
-            responseModalities: ["AUDIO"],
-          },
-        },
-        httpOptions: {
-          apiVersion: "v1alpha",
         },
       },
     });
