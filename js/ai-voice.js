@@ -1,10 +1,9 @@
 // js/ai-voice.js
 import { GoogleGenAI, Modality } from "@google/genai";
 
-// ⚠️ API key: untuk prototipe, masukkan di sini atau lewat window.GKI_GEMINI_API_KEY
-// Jangan commit kalau repositori publik.
-const GEMINI_API_KEY =
-  window.GKI_GEMINI_API_KEY || "ISI_API_KEY_GEMINI_DI_SINI";
+// Sekarang GEMINI_API_KEY akan diisi dengan ephemeral token
+// yang diambil dari backend (/api/gemini-token)
+let GEMINI_API_KEY = null; // ini nanti diisi pakai ephemeral token dari backend
 
 // === STATE & REF AUDIO ===
 let aiClient = null;
@@ -236,11 +235,6 @@ function cleanupAudio() {
 
 // === START SESSION ===
 async function startSession() {
-  if (!GEMINI_API_KEY || GEMINI_API_KEY === "ISI_API_KEY_GEMINI_DI_SINI") {
-    setError("API key Gemini belum di-set.");
-    return;
-  }
-
   if (isConnecting || isConnected) {
     return;
   }
@@ -252,18 +246,32 @@ async function startSession() {
   updateUi();
 
   try {
+    // 1. Ambil ephemeral token dari backend
+    const res = await fetch("/api/gemini-token");
+    if (!res.ok) {
+      throw new Error("Gagal mengambil token dari server");
+    }
+    const data = await res.json();
+    GEMINI_API_KEY = data.token;
+
+    if (!GEMINI_API_KEY) {
+      throw new Error("Token tidak valid");
+    }
+
+    // 2. Inisialisasi client dengan token (bukan API key langsung)
     aiClient = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
 
-    // Audio contexts
+    // 3. Siapkan AudioContext
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
     outputCtx = new AudioCtx({ sampleRate: 24000 });
     inputCtx = new AudioCtx({ sampleRate: 16000 });
 
-    // Mic
+    // 4. Minta akses mic
     micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
     const systemInstruction = buildDynamicInstruction();
 
+    // 5. Buka sesi realtime
     sessionPromise = aiClient.live.connect({
       model: "gemini-2.5-flash-native-audio-preview-09-2025",
       config: {
