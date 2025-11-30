@@ -261,25 +261,15 @@ async function startSession() {
   updateUi();
 
   try {
-    // 1. Ambil ephemeral token dari backend
-    const res = await fetch("/api/gemini-token");
-    if (!res.ok) {
-      const text = await res.text().catch(() => "");
-      throw new Error(
-        `Gagal mengambil token dari server (status ${res.status}): ${text}`
-      );
+    // 1. PAKAI API KEY LANGSUNG (UNTUK TEST)
+    const apiKey = "ISI_API_KEY_GEMINI_DI_SINI"; // ⚠️ sementara saja, jangan di-commit ke publik
+    if (!apiKey) {
+      throw new Error("API key Gemini belum di-set");
     }
 
-    const data = await res.json();
-    GEMINI_API_KEY = data.token;
-
-    if (!GEMINI_API_KEY) {
-      throw new Error("Token tidak valid");
-    }
-
-    // 2. Inisialisasi client dengan token (bukan API key langsung)
+    // 2. Inisialisasi client
     aiClient = new GoogleGenAI({
-      apiKey: GEMINI_API_KEY,
+      apiKey,
       httpOptions: { apiVersion: "v1alpha" },
     });
 
@@ -369,8 +359,12 @@ async function startSession() {
             updateUi();
           }
         },
-        onclose: () => {
-          console.log("Gemini session closed");
+        onclose: (event) => {
+          console.log(
+            "Gemini session closed:",
+            event?.code,
+            event?.reason ?? "(no reason)"
+          );
           cleanupAudio();
         },
         onerror: (err) => {
