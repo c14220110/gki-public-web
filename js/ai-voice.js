@@ -249,8 +249,12 @@ async function startSession() {
     // 1. Ambil ephemeral token dari backend
     const res = await fetch("/api/gemini-token");
     if (!res.ok) {
-      throw new Error("Gagal mengambil token dari server");
+      const text = await res.text().catch(() => "");
+      throw new Error(
+        `Gagal mengambil token dari server (status ${res.status}): ${text}`
+      );
     }
+
     const data = await res.json();
     GEMINI_API_KEY = data.token;
 
