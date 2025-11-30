@@ -263,7 +263,10 @@ async function startSession() {
     }
 
     // 2. Inisialisasi client dengan token (bukan API key langsung)
-    aiClient = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
+    aiClient = new GoogleGenAI({
+      apiKey: GEMINI_API_KEY,
+      apiVersion: "v1alpha",
+    });
 
     // 3. Siapkan AudioContext
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
