@@ -265,7 +265,7 @@ async function startSession() {
     // 2. Inisialisasi client dengan token (bukan API key langsung)
     aiClient = new GoogleGenAI({
       apiKey: GEMINI_API_KEY,
-      apiVersion: "v1alpha",
+      httpOptions: { apiVersion: "v1alpha" },
     });
 
     // 3. Siapkan AudioContext
@@ -299,6 +299,11 @@ async function startSession() {
           console.log("Gemini Live connected");
         },
         onmessage: async (msg) => {
+          if (msg.error) {
+            console.error("Gemini server error:", msg.error);
+            setError("Terjadi error dari server AI.");
+            return;
+          }
           const serverContent = msg && msg.serverContent;
           const inlineData =
             serverContent &&
