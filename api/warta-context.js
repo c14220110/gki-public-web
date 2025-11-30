@@ -1,120 +1,110 @@
 // api/warta-context.js
-import { GoogleGenAI } from "@google/genai";
 
+// URL Apps Script yang sudah kamu pakai di front-end
 const APPS_URL =
   "https://script.google.com/macros/s/AKfycbwy43M6LfmKXBXOQuaLq1MvpjG1-0w2mAirMh3ipoYQeUEvXGp08YseKGmgKfnd80SQ6Q/exec";
 
-// Model teks / dokumen yang punya free tier dan bisa baca PDF
-const WARTA_MODEL = "gemini-2.5-pro";
+// Pakai Gemini 1.5 Flash yang stabil & free tier buat summary PDF
+const GEMINI_MODEL = "models/gemini-1.5-flash";
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
-// === CACHE DI MEMORY SERVERLESS ===
-// Vercel akan reuse instance ini selama belum cold start
-let lastFileId = null;
-let lastContext = null;
+// --- CACHE DI MEMORY (per instance serverless) ---
+let cachedFileId = null;
+let cachedSummary = null;
+let cachedSource = null;
 
 export default async function handler(req, res) {
   if (req.method !== "GET") {
-    res.status(405).json({ error: "Method not allowed" });
+    res.status(405).json({ ok: false, reason: "Method not allowed" });
     return;
   }
 
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    console.error("[WARTA] GEMINI_API_KEY belum di-set di Vercel.");
-    // Jangan bikin frontend error 500
+  // Pastikan API key ada
+  if (!GEMINI_API_KEY) {
+    console.error("[WARTA] Missing GEMINI_API_KEY env var");
     res.status(200).json({
       ok: false,
-      context: "",
-      reason: "GEMINI_API_KEY not set",
+      reason: "Server belum dikonfigurasi GEMINI_API_KEY",
     });
     return;
   }
 
   try {
-    // 1. Ambil daftar Warta dari Apps Script
-    const listRes = await fetch(APPS_URL);
-    if (!listRes.ok) {
-      const txt = await listRes.text().catch(() => "");
+    // 1) Ambil list Warta dari Apps Script
+    const appsRes = await fetch(APPS_URL);
+    if (!appsRes.ok) {
+      const text = await appsRes.text().catch(() => "");
       console.error(
-        "[WARTA] Gagal fetch APPS_URL:",
-        listRes.status,
-        listRes.statusText,
-        txt
+        "[WARTA] Apps Script error:",
+        appsRes.status,
+        appsRes.statusText,
+        text
       );
       res.status(200).json({
         ok: false,
-        context: "",
-        reason: "Failed to fetch warta list",
+        reason: `Apps Script error: ${appsRes.status} ${appsRes.statusText}`,
       });
       return;
     }
 
-    const listJson = await listRes.json();
-    const files = Array.isArray(listJson.files) ? listJson.files : [];
+    const data = await appsRes.json();
+    const files = Array.isArray(data.files) ? data.files : [];
 
     if (!files.length) {
-      console.warn("[WARTA] Tidak ada file warta dalam response Apps Script.");
+      console.warn("[WARTA] Tidak ada files di Apps Script JSON");
       res.status(200).json({
-        ok: true,
-        context: "",
-        reason: "No warta files",
+        ok: false,
+        reason: "Tidak ada file Warta di Apps Script",
       });
       return;
     }
 
-    // 2. Ambil Warta paling baru (index 0)
-    const latest = files[0];
-    const latestId = latest.id;
-    const latestName = latest.name || "Warta Jemaat";
-    const latestModified = latest.modifiedTime || null;
-    const pdfUrl = latest.downloadUrl || latest.viewUrl;
+    // 2) Ambil file terbaru (by modifiedTime desc)
+    const sorted = [...files].sort(
+      (a, b) => new Date(b.modifiedTime) - new Date(a.modifiedTime)
+    );
+    const latest = sorted[0];
 
-    if (!pdfUrl) {
-      console.warn("[WARTA] File terbaru tanpa downloadUrl:", latestName);
+    const fileId = latest.id;
+    const fileName = latest.name;
+    const downloadUrl = latest.downloadUrl;
+    const modifiedTime = latest.modifiedTime;
+
+    if (!downloadUrl) {
       res.status(200).json({
-        ok: true,
-        context: "",
-        reason: "Latest warta has no downloadUrl",
-        title: latestName,
-        modifiedTime: latestModified,
+        ok: false,
+        reason: "File Warta tidak punya downloadUrl",
       });
       return;
     }
 
-    // 3. Kalau masih sama dengan file yang terakhir diringkas → pakai cache
-    if (lastFileId === latestId && lastContext) {
-      console.log(
-        "[WARTA] Menggunakan ringkasan dari cache untuk:",
-        latestName
-      );
+    // 3) Kalau fileId sama dengan cache & sudah ada summary → pakai cache
+    if (cachedFileId === fileId && cachedSummary && cachedSource) {
+      console.log("[WARTA] Using cached summary for", fileName);
       res.status(200).json({
         ok: true,
-        context: lastContext,
-        cached: true,
-        title: latestName,
-        modifiedTime: latestModified,
+        source: cachedSource,
+        summary: cachedSummary,
+        fromCache: true,
       });
       return;
     }
 
-    console.log("[WARTA] Download & ringkas warta terbaru:", latestName);
+    console.log("[WARTA] Fetching PDF for summarization:", fileName);
 
-    // 4. Download PDF dan ubah jadi base64
-    const pdfRes = await fetch(pdfUrl);
+    // 4) Download PDF binary dari Google Drive
+    const pdfRes = await fetch(downloadUrl);
     if (!pdfRes.ok) {
-      const txt = await pdfRes.text().catch(() => "");
+      const text = await pdfRes.text().catch(() => "");
       console.error(
-        "[WARTA] Gagal download PDF warta:",
+        "[WARTA] Gagal download PDF:",
         pdfRes.status,
         pdfRes.statusText,
-        txt
+        text
       );
       res.status(200).json({
         ok: false,
-        context: "",
-        reason: "Failed to download warta PDF",
-        title: latestName,
-        modifiedTime: latestModified,
+        reason: `Gagal download PDF: ${pdfRes.status} ${pdfRes.statusText}`,
       });
       return;
     }
@@ -122,107 +112,92 @@ export default async function handler(req, res) {
     const pdfArrayBuffer = await pdfRes.arrayBuffer();
     const pdfBase64 = Buffer.from(pdfArrayBuffer).toString("base64");
 
-    // 5. Ringkas pakai Gemini 1.5 Flash (inlineData PDF)
-    const client = new GoogleGenAI({ apiKey });
+    // 5) Panggil Gemini untuk merangkum PDF
+    const promptText =
+      "Dokumen ini adalah Warta Jemaat / buletin gereja." +
+      " Tolong ringkas isi dokumen ini dalam 10–15 poin bullet berbahasa Indonesia yang singkat & jelas." +
+      " Fokus pada: tema ibadah, pengumuman penting, jadwal ibadah, pelayanan, kegiatan komunitas, dan informasi lain yang relevan untuk jemaat." +
+      " Jangan tulis ulang isi PDF apa adanya, tapi buat ringkasan yang mudah dimengerti jemaat.";
 
-    const prompt = [
-      `Kamu akan membaca file PDF Warta Jemaat berjudul "${latestName}" dari Gereja Kristen Indonesia (GKI) Kutisari Indah di Surabaya.`,
-      "",
-      "Tolong buat ringkasan dalam bahasa Indonesia yang rapi dan mudah dimengerti jemaat, dengan struktur:",
-      "1. Tema utama ibadah / renungan minggu ini (maks 3 kalimat).",
-      "2. Poin-poin pengumuman penting (ibadah, pelayanan, kegiatan kategorial, persekutuan, dll).",
-      "3. Jadwal atau tanggal penting yang perlu diperhatikan jemaat.",
-      "",
-      "Jawabanmu maksimal sekitar 200 kata dan cocok dibacakan oleh asisten suara.",
-    ].join("\n");
+    const geminiUrl =
+      "https://generativelanguage.googleapis.com/v1beta/" +
+      GEMINI_MODEL +
+      ":generateContent?key=" +
+      encodeURIComponent(GEMINI_API_KEY);
 
-    const result = await client.models.generateContent({
-      model: WARTA_MODEL,
-      contents: [
-        {
-          role: "user",
-          parts: [
-            { text: prompt },
-            {
-              inlineData: {
-                data: pdfBase64,
-                mimeType: "application/pdf",
+    const genRes = await fetch(geminiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        contents: [
+          {
+            role: "user",
+            parts: [
+              {
+                inlineData: {
+                  mimeType: "application/pdf",
+                  data: pdfBase64,
+                },
               },
-            },
-          ],
-        },
-      ],
+              {
+                text: promptText,
+              },
+            ],
+          },
+        ],
+      }),
     });
 
-    let summaryText = "";
-
-    if (
-      result &&
-      result.response &&
-      typeof result.response.text === "function"
-    ) {
-      summaryText = result.response.text();
-    } else if (
-      result &&
-      result.response &&
-      Array.isArray(result.response.candidates)
-    ) {
-      const first = result.response.candidates[0];
-      if (
-        first &&
-        first.content &&
-        Array.isArray(first.content.parts) &&
-        first.content.parts.length
-      ) {
-        summaryText =
-          first.content.parts
-            .map((p) => p.text || "")
-            .join(" ")
-            .trim() || "";
-      }
-    }
-
-    summaryText = (summaryText || "").trim();
-
-    if (!summaryText) {
-      console.warn("[WARTA] Ringkasan kosong untuk:", latestName);
-      const fallback =
-        `Warta jemaat terbaru berjudul "${latestName}" sudah tersedia, ` +
-        `namun ringkasan otomatis tidak berhasil dibuat. ` +
-        `Silakan baca file wartanya secara langsung untuk informasi lengkap.`;
-
-      lastFileId = latestId;
-      lastContext = fallback;
-
+    if (!genRes.ok) {
+      const text = await genRes.text().catch(() => "");
+      console.error("[WARTA] Gemini API error:", genRes.status, text);
       res.status(200).json({
-        ok: true,
-        context: fallback,
-        cached: false,
-        title: latestName,
-        modifiedTime: latestModified,
+        ok: false,
+        reason: `Gemini API error: ${genRes.status}`,
+        details: text.slice(0, 300),
       });
       return;
     }
 
-    const fullContext = `Ringkasan Warta Jemaat terbaru "${latestName}":\n${summaryText}`;
+    const genJson = await genRes.json();
 
-    // 6. Simpan ke cache
-    lastFileId = latestId;
-    lastContext = fullContext;
+    const summaryText =
+      genJson?.candidates?.[0]?.content?.parts
+        ?.map((p) => p.text || "")
+        .join("")
+        .trim() || "";
+
+    if (!summaryText) {
+      console.error("[WARTA] Summary kosong dari Gemini:", genJson);
+      res.status(200).json({
+        ok: false,
+        reason: "Ringkasan dari Gemini kosong",
+      });
+      return;
+    }
+
+    // 6) Simpan cache di memory
+    cachedFileId = fileId;
+    cachedSummary = summaryText;
+    cachedSource = { id: fileId, name: fileName, modifiedTime };
+
+    console.log("[WARTA] Summary generated for", fileName);
 
     res.status(200).json({
       ok: true,
-      context: fullContext,
-      cached: false,
-      title: latestName,
-      modifiedTime: latestModified,
+      source: cachedSource,
+      summary: cachedSummary,
+      fromCache: false,
     });
   } catch (err) {
-    console.error("[WARTA] Fatal error saat build context:", err);
-    // Tetap balikin 200 supaya frontend tidak error
+    console.error(
+      "[WARTA] Unexpected error while building warta context:",
+      err
+    );
     res.status(200).json({
       ok: false,
-      context: "",
       reason: "Unexpected error while building warta context",
     });
   }
