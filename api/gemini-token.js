@@ -15,8 +15,9 @@ export default async function handler(req, res) {
 
   try {
     // client akan otomatis ambil GEMINI_API_KEY dari env Vercel
-    const client = new GoogleGenAI({});
-
+    const client = new GoogleGenAI({
+      apiKey: process.env.GEMINI_API_KEY, // 🔹 pake env dari Vercel
+    });
     // expired 30 menit ke depan (max waktu sesi)
     const expireTime = new Date(Date.now() + 30 * 60 * 1000).toISOString();
 
