@@ -249,6 +249,7 @@ function cleanupAudio() {
 }
 
 // === START SESSION ===
+// === START SESSION ===
 async function startSession() {
   if (isConnecting || isConnected) {
     return;
@@ -261,15 +262,27 @@ async function startSession() {
   updateUi();
 
   try {
-    // 1. PAKAI API KEY LANGSUNG (UNTUK TEST)
-    const apiKey = "AIzaSyDJCv_YHO0QF8JD_kqnietLjyfNPbLzngI"; // ⚠️ sementara saja, jangan di-commit ke publik
-    if (!apiKey) {
-      throw new Error("API key Gemini belum di-set");
+    // 1. Ambil ephemeral token dari backend (BUKAN API key langsung)
+    const res = await fetch("/api/gemini-token");
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      throw new Error(
+        `Gagal mengambil token dari server (status ${res.status}): ${text}`
+      );
     }
 
-    // 2. Inisialisasi client
+    const data = await res.json();
+    const ephemeralToken = data.token;
+    if (!ephemeralToken) {
+      throw new Error("Token tidak valid");
+    }
+
+    // Simpan kalau mau dicek
+    GEMINI_API_KEY = ephemeralToken;
+
+    // 2. Inisialisasi client pakai ephemeral token
     aiClient = new GoogleGenAI({
-      apiKey,
+      apiKey: ephemeralToken,
       httpOptions: { apiVersion: "v1alpha" },
     });
 
@@ -281,9 +294,10 @@ async function startSession() {
     // 4. Minta akses mic
     micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
+    // 5. Build system instruction dari konten website (Supabase)
     const systemInstruction = buildDynamicInstruction();
 
-    // 5. Buka sesi realtime
+    // 6. Buka sesi realtime
     sessionPromise = aiClient.live.connect({
       model: "gemini-2.5-flash-native-audio-preview-09-2025",
       config: {
@@ -319,7 +333,6 @@ async function startSession() {
             serverContent.modelTurn.parts[0].inlineData;
 
           if (inlineData && inlineData.data) {
-            // Audio dari AI
             if (!outputCtx) return;
             const base64Audio = inlineData.data;
             const audioBytes = base64ToUint8Array(base64Audio);
