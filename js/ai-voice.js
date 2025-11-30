@@ -314,6 +314,8 @@ async function startSession() {
     const systemInstruction = buildDynamicInstruction();
 
     // 6. Buka sesi realtime
+    console.log("[AI-VOICE] Using voice:", "Puck");
+
     sessionPromise = aiClient.live.connect({
       model: "gemini-2.5-flash-native-audio-preview-09-2025",
       config: {
@@ -321,7 +323,7 @@ async function startSession() {
         systemInstruction,
         speechConfig: {
           voiceConfig: {
-            prebuiltVoiceConfig: { voiceName: "Orus" },
+            prebuiltVoiceConfig: { voiceName: "Puck" },
           },
         },
       },
