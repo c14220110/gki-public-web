@@ -95,7 +95,7 @@ function decodeAudioData(bytes, audioContext, sampleRate, channels = 1) {
   });
 }
 
-// === HELPER: Bangun SYSTEM_INSTRUCTION dari data website (Supabase) ===
+// === HELPER: Bangun SYSTEM_INSTRUCTION dari data website DATABASE bukan dari hardcoded ===
 function buildDynamicInstruction() {
   const data = window.__gkiContent || null;
 
