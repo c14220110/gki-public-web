@@ -34,21 +34,36 @@ let errorBox = null;
 let visualizer = null;
 
 // === HELPER: PCM utils (port dari audioUtils.ts) ===
-function createPcmBlob(float32Array) {
-  // Konversi Float32 [-1,1] ke Int16 LE
-  const buffer = new ArrayBuffer(float32Array.length * 2);
-  const view = new DataView(buffer);
 
-  for (let i = 0; i < float32Array.length; i++) {
-    let s = float32Array[i];
-    s = Math.max(-1, Math.min(1, s));
-    const val = s < 0 ? s * 0x8000 : s * 0x7fff;
-    view.setInt16(i * 2, val, true);
+// ArrayBuffer -> base64 (untuk kirim audio ke Gemini)
+function arrayBufferToBase64(buffer) {
+  let binary = "";
+  const bytes = new Uint8Array(buffer);
+  const len = bytes.byteLength;
+  for (let i = 0; i < len; i++) {
+    binary += String.fromCharCode(bytes[i]);
   }
-
-  return new Blob([buffer], { type: "audio/pcm" });
+  return btoa(binary);
 }
 
+// Bikin "blob" versi @google/genai (BUKAN DOM Blob)
+function createPcmBlob(float32Array) {
+  const l = float32Array.length;
+  const int16 = new Int16Array(l);
+
+  for (let i = 0; i < l; i++) {
+    let s = float32Array[i];
+    s = Math.max(-1, Math.min(1, s));
+    int16[i] = s < 0 ? s * 0x8000 : s * 0x7fff;
+  }
+
+  return {
+    data: arrayBufferToBase64(int16.buffer),
+    mimeType: "audio/pcm;rate=16000",
+  };
+}
+
+// base64 -> Uint8Array (untuk decode audio dari Gemini)
 function base64ToUint8Array(base64) {
   const binary = atob(base64);
   const len = binary.length;
@@ -304,6 +319,7 @@ async function startSession() {
             setError("Terjadi error dari server AI.");
             return;
           }
+
           const serverContent = msg && msg.serverContent;
           const inlineData =
             serverContent &&
