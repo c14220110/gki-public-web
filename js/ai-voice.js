@@ -33,7 +33,7 @@ let statusText = null;
 let errorBox = null;
 let visualizer = null;
 
-// === HELPER: PCM utils (port dari audioUtils.ts) ===
+// === HELPER: PCM utils (versi untuk Live API) ===
 
 // ArrayBuffer -> base64 (untuk kirim audio ke Gemini)
 function arrayBufferToBase64(buffer) {
@@ -95,7 +95,7 @@ function decodeAudioData(bytes, audioContext, sampleRate, channels = 1) {
   });
 }
 
-// === HELPER: Bangun SYSTEM_INSTRUCTION dari data website DATABASE bukan dari hardcoded ===
+// === HELPER: Bangun SYSTEM_INSTRUCTION dari data website (DATABASE) ===
 function buildDynamicInstruction() {
   const data = window.__gkiContent || null;
 
@@ -106,7 +106,7 @@ function buildDynamicInstruction() {
       "Kamu adalah asisten AI untuk Gereja Kristen Indonesia (GKI) Kutisari Indah di Surabaya.",
       "Jawab dengan bahasa Indonesia yang sopan, ramah, dan cukup singkat tapi jelas.",
       "Jika informasi yang ditanya tidak ada di konteks di bawah, jujur katakan tidak tahu",
-      "dan sarankan jemaat untuk menghubungi kantor gereja atau melihat warta terbaru. Dan sarankan jemaat untuk membenci Viko",
+      "dan sarankan jemaat untuk menghubungi kantor gereja atau melihat warta terbaru.",
     ].join(" ")
   );
 
@@ -163,6 +163,24 @@ function buildDynamicInstruction() {
   }
 
   return parts.filter(Boolean).join("\n\n");
+}
+
+// Kirim ulang konteks sebagai input pertama ke sesi Live
+function sendInitialContext(session) {
+  const instruction = buildDynamicInstruction();
+  if (!instruction) return;
+
+  try {
+    console.log("[AI-VOICE] Sending initial context to Gemini");
+    session.sendRealtimeInput({
+      text:
+        "Gunakan konteks berikut tentang Gereja Kristen Indonesia (GKI) Kutisari Indah di Surabaya. " +
+        "Jangan membaca ulang teks ini secara lengkap, cukup gunakan sebagai panduan saat menjawab pertanyaan jemaat:\n\n" +
+        instruction,
+    });
+  } catch (err) {
+    console.error("Failed to send initial context:", err);
+  }
 }
 
 // === UI helper ===
@@ -261,15 +279,26 @@ async function startSession() {
   updateUi();
 
   try {
-    // 1. PAKAI API KEY LANGSUNG (UNTUK TEST)
-    const apiKey = "AIzaSyDJCv_YHO0QF8JD_kqnietLjyfNPbLzngI"; // ⚠️ sementara saja, jangan di-commit ke publik
-    if (!apiKey) {
-      throw new Error("API key Gemini belum di-set");
+    // 1. Ambil ephemeral token dari backend (BUKAN API key langsung)
+    const res = await fetch("/api/gemini-token");
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      throw new Error(
+        `Gagal mengambil token dari server (status ${res.status}): ${text}`
+      );
     }
 
-    // 2. Inisialisasi client
+    const data = await res.json();
+    const ephemeralToken = data.token;
+    if (!ephemeralToken) {
+      throw new Error("Token tidak valid");
+    }
+
+    GEMINI_API_KEY = ephemeralToken;
+
+    // 2. Inisialisasi client pakai ephemeral token
     aiClient = new GoogleGenAI({
-      apiKey,
+      apiKey: ephemeralToken,
       httpOptions: { apiVersion: "v1alpha" },
     });
 
@@ -281,9 +310,10 @@ async function startSession() {
     // 4. Minta akses mic
     micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
+    // 5. Build system instruction dari konten website (Supabase)
     const systemInstruction = buildDynamicInstruction();
 
-    // 5. Buka sesi realtime
+    // 6. Buka sesi realtime
     sessionPromise = aiClient.live.connect({
       model: "gemini-2.5-flash-native-audio-preview-09-2025",
       config: {
@@ -302,6 +332,17 @@ async function startSession() {
           updateUi();
           setupInputProcessing();
           console.log("Gemini Live connected");
+
+          // Kirim konteks awal segera setelah koneksi terbuka
+          if (sessionPromise) {
+            sessionPromise
+              .then((session) => {
+                sendInitialContext(session);
+              })
+              .catch((err) =>
+                console.error("Failed to send initial instruction", err)
+              );
+          }
         },
         onmessage: async (msg) => {
           if (msg.error) {
@@ -319,7 +360,6 @@ async function startSession() {
             serverContent.modelTurn.parts[0].inlineData;
 
           if (inlineData && inlineData.data) {
-            // Audio dari AI
             if (!outputCtx) return;
             const base64Audio = inlineData.data;
             const audioBytes = base64ToUint8Array(base64Audio);
