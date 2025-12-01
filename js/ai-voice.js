@@ -98,27 +98,38 @@ function decodeAudioData(bytes, audioContext, sampleRate, channels = 1) {
 // === HELPER: Bangun SYSTEM_INSTRUCTION dari data website (DATABASE) ===
 function buildDynamicInstruction() {
   const data = window.__gkiContent || null;
+  const wartaSummary = window.__gkiWartaContext || null;
 
   const parts = [];
 
+  // Identitas & gaya bicara
   parts.push(
     [
-      "Kamu adalah asisten AI suara untuk Gereja Kristen Indonesia (GKI) Kutisari Indah di Surabaya.",
-      "Bicaralah dengan tempo yang pelan dan tenang, tidak terburu-buru, seperti cara pendeta atau pelayan jemaat menjelaskan firman kepada jemaat.",
-      "Gunakan bahasa Indonesia yang sopan, jelas, dan mudah dimengerti oleh Bapak/Ibu dan jemaat lanjut usia.",
-      "Gunakan sapaan yang hormat seperti 'Bapak', 'Ibu', atau 'Saudara/Saudari', dan hindari kata-kata gaul atau bercanda berlebihan. Pakai Shalom di awal!",
-      "Jawab dengan kalimat yang cukup singkat namun tetap lengkap dan mudah dipahami.",
-      "Jika informasi yang ditanya tidak ada di konteks di bawah, jujur katakan bahwa kamu tidak tahu",
-      "dan sarankan jemaat untuk menghubungi kantor gereja atau melihat Warta Jemaat terbaru.",
+      "Kamu adalah asisten AI untuk Gereja Kristen Indonesia (GKI) Kutisari Indah di Surabaya.",
+      "Jawab SELALU dalam bahasa Indonesia yang sopan, ramah, pelan, dan tenang seperti suasana gereja.",
+      "Gunakan kalimat yang jelas dan tidak terlalu cepat, seolah-olah sedang berbicara dengan jemaat dewasa dan lansia.",
+      "Jawabanmu cukup singkat namun tetap lengkap, jangan terlalu bertele-tele.",
     ].join(" ")
   );
 
+  // Batasan umum
+  parts.push(
+    [
+      "Kamu TIDAK bisa membuka link atau file sendiri.",
+      "Kamu hanya boleh memakai informasi yang tertulis di instruksi sistem ini (tentang gereja, jadwal, dan ringkasan warta).",
+      "Jika informasi yang ditanya tidak ada di konteks di bawah, jujur katakan kamu tidak punya datanya,",
+      "dan sarankan jemaat untuk menghubungi kantor gereja atau melihat Warta Jemaat lengkap.",
+    ].join(" ")
+  );
+
+  // Hero section
   if (data && data.hero) {
     parts.push(
-      `Hero title di halaman utama: "${data.hero.title}" dengan subjudul "${data.hero.subtitle}".`
+      `Informasi umum halaman utama: judul hero "${data.hero.title}" dengan subjudul "${data.hero.subtitle}".`
     );
   }
 
+  // Tentang Gereja
   if (data && data.about) {
     parts.push(
       "Tentang gereja:",
@@ -126,6 +137,7 @@ function buildDynamicInstruction() {
     );
   }
 
+  // Jadwal ibadah & kegiatan
   if (data && data.schedules && Array.isArray(data.schedules.items)) {
     const jadwalLines = data.schedules.items
       .map((item) =>
@@ -134,34 +146,49 @@ function buildDynamicInstruction() {
         }`.trim()
       )
       .join("\n");
-    parts.push("Jadwal ibadah & kegiatan terbaru:", jadwalLines);
+    parts.push("Jadwal ibadah & kegiatan dari website:", jadwalLines);
   }
 
+  // Profil gembala
   if (data && data.pastor) {
     parts.push(
       "Profil Gembala Sidang:",
-      `Nama: ${data.pastor.name || "-"}, nomor yang tertera di website: ${
+      `Nama: ${data.pastor.name || "-"}. Nomor yang tercantum di website: ${
         data.pastor.phone || "-"
       }.`,
       data.pastor.description || ""
     );
   }
 
+  // Kontak
   if (data && data.contact) {
     parts.push(
-      "Informasi kontak di website:",
+      "Informasi kontak gereja dari website:",
       `Alamat: ${data.contact.addressText || ""}`,
-      `WA kantor: ${data.contact.officeWhatsappLabel || "WhatsApp Kantor"} (${
-        data.contact.officeWhatsappUrl || ""
-      })`
+      `WhatsApp kantor: ${
+        data.contact.officeWhatsappLabel || "WhatsApp Kantor"
+      } (${data.contact.officeWhatsappUrl || ""}).`
     );
   }
 
-  // Jika di masa depan kamu punya ringkasan warta → taruh di window.__gkiWartaContext
-  if (window.__gkiWartaContext) {
+  // WARTA: bagian paling penting buat kasusmu
+  if (wartaSummary) {
     parts.push(
-      "Ringkasan warta jemaat terbaru (boleh jadi referensi jika jemaat bertanya isi warta):",
-      String(window.__gkiWartaContext)
+      [
+        "Kamu JUGA memiliki ringkasan Warta Jemaat terbaru berikut ini.",
+        "Jika jemaat bertanya tentang Warta Jemaat, pengumuman minggu ini, jadwal khusus (Natal, Tahun Baru, Sakramen, Aksi Sosial), atau kegiatan yang tertulis di Warta,",
+        "gunakan ringkasan warta di bawah ini untuk menjawab.",
+        "Saat menjawab, sebutkan bahwa informasi ini berasal dari Warta Jemaat terbaru.",
+      ].join(" ")
+    );
+    parts.push("Ringkasan Warta Jemaat terbaru:", String(wartaSummary));
+  } else {
+    parts.push(
+      [
+        "Saat ini kamu TIDAK memiliki ringkasan Warta Jemaat di konteks.",
+        "Jika jemaat bertanya detail isi Warta Jemaat, jawab dengan sopan bahwa kamu tidak punya akses ringkasannya,",
+        "dan sarankan jemaat membuka Warta Jemaat yang bisa diunduh di halaman Warta gereja.",
+      ].join(" ")
     );
   }
 

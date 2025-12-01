@@ -4,7 +4,7 @@
 const APPS_URL =
   "https://script.google.com/macros/s/AKfycbwy43M6LfmKXBXOQuaLq1MvpjG1-0w2mAirMh3ipoYQeUEvXGp08YseKGmgKfnd80SQ6Q/exec";
 
-// Pakai Gemini 1.5 Flash yang stabil & free tier buat summary PDF
+// Pakai Gemini 2.5 Flash yang stabil & free tier buat summary PDF
 const GEMINI_MODEL = "models/gemini-2.5-flash";
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
