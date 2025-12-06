@@ -19,6 +19,14 @@ function injectScript(src, onerror) {
   document.body.appendChild(s);
 }
 
+// === UTIL: decode HTML entities (contoh: &quot; -> ") ===
+function decodeHtmlEntities(str) {
+  if (!str) return "";
+  const txt = document.createElement("textarea");
+  txt.innerHTML = str;
+  return txt.value;
+}
+
 // === YOUTUBE SPOTLIGHT (JSONP -> fallback ke API) ===
 window.renderYT = function renderYT(data) {
   const grid = document.getElementById("youtube-spotlight-container");
@@ -43,6 +51,7 @@ window.renderYT = function renderYT(data) {
   const finalThumb = videoId
     ? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`
     : v.thumbnail || "";
+  const titleText = decodeHtmlEntities(v.title || "");
   const whenText = isLive
     ? "Sedang live sekarang."
     : isUpcoming && v.liveDetails && v.liveDetails.scheduledStartTime
@@ -77,7 +86,7 @@ window.renderYT = function renderYT(data) {
   imgWrapper.className = "relative";
   const img = document.createElement("img");
   img.src = finalThumb;
-  img.alt = v.title || "";
+  img.alt = titleText;
   img.className = "w-full h-56 object-cover";
   img.loading = "lazy";
   img.decoding = "async";
@@ -97,7 +106,7 @@ window.renderYT = function renderYT(data) {
   const h3 = document.createElement("h3");
   h3.className = "text-xl font-bold mt-2";
   h3.style.color = "var(--color-text-main)";
-  h3.textContent = v.title || "";
+  h3.textContent = titleText;
   const pWhen = document.createElement("p");
   pWhen.className = "mt-2";
   pWhen.style.color = "var(--color-text-secondary)";
@@ -182,7 +191,7 @@ async function fetchYouTubeDirect(channelId, apiKey) {
     status,
     video: {
       id: vidId,
-      title: snippet.title,
+      title: decodeHtmlEntities(snippet.title),
       url: `https://www.youtube.com/watch?v=${vidId}`,
       publishedAt: snippet.publishedAt,
       liveDetails: liveStreamingDetails,
