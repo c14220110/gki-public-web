@@ -15,6 +15,7 @@ let processor = null;
 let sourceNode = null;
 let micStream = null;
 let nextStartTime = 0;
+let activeSources = []; // Track active audio sources
 
 // STATE UI
 let isConnecting = false;
@@ -106,9 +107,9 @@ function buildDynamicInstruction() {
   parts.push(
     [
       "Kamu adalah asisten AI untuk Gereja Kristen Indonesia (GKI) Kutisari Indah di Surabaya.",
-      "Jawab SELALU dalam bahasa Indonesia yang sopan, ramah, pelan, dan tenang seperti suasana gereja.",
-      "Gunakan kalimat yang jelas dan tidak terlalu cepat, seolah-olah sedang berbicara dengan jemaat dewasa dan lansia.",
-      "Jawabanmu cukup singkat namun tetap lengkap, jangan terlalu bertele-tele.",
+      "Jawab SELALU dalam bahasa Indonesia yang sopan, ramah, NAMUN AGAK CEPAT dan ENERGIK.",
+      "Jangan berbicara terlalu lambat. Gunakan intonasi yang hidup dan tidak membosankan.",
+      "Jawabanmu harus SINGKAT, PADAT, dan LUGAS. Jangan bertele-tele.",
     ].join(" ")
   );
 
@@ -261,8 +262,22 @@ function setError(msg) {
 }
 
 // === AUDIO CLEANUP ===
+function stopAllAudio() {
+  activeSources.forEach((source) => {
+    try {
+      source.stop();
+      source.disconnect();
+    } catch (e) {
+      // ignore if already stopped
+    }
+  });
+  activeSources = [];
+}
+
 function cleanupAudio() {
   try {
+    stopAllAudio(); // Stop any playing audio
+
     if (processor) {
       processor.disconnect();
       processor.onaudioprocess = null;
@@ -414,7 +429,13 @@ async function startSession() {
               source.start(startTime);
               nextStartTime = startTime + audioBuffer.duration;
 
+              // Track active source
+              activeSources.push(source);
+
               source.onended = () => {
+                // Remove from active sources
+                activeSources = activeSources.filter((s) => s !== source);
+
                 if (outputCtx && outputCtx.currentTime >= nextStartTime - 0.1) {
                   isSpeaking = false;
                   updateUi();
@@ -426,6 +447,8 @@ async function startSession() {
           }
 
           if (serverContent && serverContent.interrupted) {
+            console.log("Interrupted by user! Stopping audio...");
+            stopAllAudio(); // Stop all currently playing audio
             isSpeaking = false;
             nextStartTime = 0;
             updateUi();
