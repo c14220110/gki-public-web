@@ -607,6 +607,26 @@ document.addEventListener("DOMContentLoaded", () => {
       // ⬆⬆⬆
     } catch (err) {
       console.warn("⚠️ Error memanggil /api/warta-context:", err);
+    } finally {
+      // === ENABLE BUTTON SETELAH SELESAI (SUKSES ATAU GAGAL) ===
+      const btn = document.getElementById("ai-voice-trigger");
+      const label = document.getElementById("ai-voice-label");
+      if (btn && label) {
+        btn.disabled = false;
+        // Hapus class disabled (abu-abu)
+        btn.classList.remove("bg-gray-500");
+        // Tambah class gradient & hover
+        btn.classList.add(
+          "bg-gradient-to-r",
+          "from-amber-500",
+          "to-orange-600",
+          "transform",
+          "hover:scale-105",
+          "active:scale-95"
+        );
+        // Kembalikan teks
+        label.textContent = "Tanya AI Gereja";
+      }
     }
   }
 
